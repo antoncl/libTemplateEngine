@@ -1,0 +1,11 @@
+/* extracted from http://bottlecaps.de/rr/ui on Tue Jan 5, 2016, 22:27 (UTC+01)
+ */
+
+Template  ::= ( [^\{}] | '\\' | '\{' | '\}' | '{{' Instruction '}}' )+
+
+Instruction ::=  (DictionaryName|'#' 'REPEAT' DictionaryName '}}' Template* '{{' '/' 'REPEAT' |'-' Comment) 
+
+DictionaryName ::= [A-Za-z0-9]+
+
+Comment ::= [^\{}]
+
