@@ -5,7 +5,6 @@ if [ -d "build" ]; then
 	echo "Deleting old configuration"
 	rm -R build
 fi
-
 #
 # Build the debug version
 #
@@ -16,7 +15,6 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=../.. -G"Unix Makefiles" .
 cd ../..
 cmake --build build/debug --config Debug
 cmake --build build/debug --target install
-
 #
 # Build the release version
 #

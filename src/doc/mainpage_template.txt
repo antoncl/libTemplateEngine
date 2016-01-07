@@ -1,18 +1,3 @@
-- [Introduction](#)
-- [Motivation](#)
-- [Goals](#)
-- [Licensing](#)
-- [Concept](#)
-- [Processing instructions](#)
-	- [Expansion](#)
-	- [Repeat](#)
-	- [Comment](#)
-- [Context and dictionaries](#)
-- [Error reporting}](#)
-- [Unicode and character sets](#)
-- [Scanner](#)
-- [UTF-8 and UTF-16 conversion](#)
-
 # Introduction
 libTemplateEngine is a simple unicode aware templating engine.
 
@@ -269,21 +254,3 @@ The task of managing the input is delegated to the [scanner][RefScanner]. The pu
 
 # UTF-8 and UTF-16 conversion
 On windows libTemplateEngine has a small [utility][RefConverter], called te_converter, which can convert between UTF-8 and UTF-16. To the best of my knowledge that conversion utility is correct. Although the c++11 standard has methods for converting between UTF-32 and its smaller counterparts I have been unable to link that code under windows. There appears to be a bug reported to MS about this, and although it is more than six months old it hasn't been patched yet. Consequently the library has no means of converting between UTF-32 and UTF-16.
-
-[ConceptSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/concept.svg
-[TemplateSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/template.svg
-[InstructionSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/instruction.svg
-[Boost]: http://www.boost.org/
-[CMake]: https://cmake.org/
-[doxygen]: http://www.stack.nl/~dimitri/doxygen/
-[GnuLgpl]: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
-[RefDictionaryList]:./src/TemplateEngine/include/DictionaryList.hpp
-[RefDictionary]: ./src/TemplateEngine/include/Dictionary.hpp
-[RefContext]:./src/TemplateEngine/include/Context.hpp
-[RefContextCTOR]:./src/TemplateEngine/include/Context.hpp
-[RefTemplateRender]:./src/TemplateEngine/include/Template.hpp
-[RefContextSetDictionary]:./src/TemplateEngine/include/Context.hpp
-[RefTemplateException]:./src/TemplateEngine/include/TemplateException.hpp
-[RefAddStdString]: ./src/TemplateEngine/include/Dictionary.hpp
-[RefScanner]: ./src/TemplateEngine/include/Scanner.hpp
-[RefConverter]: ./src/TemplateEngine/include/Types.hpp
