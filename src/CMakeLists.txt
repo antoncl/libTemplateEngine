@@ -26,7 +26,7 @@ endif ()
 
 if (WIN32)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc -D_CRT_SECURE_NO_WARNINGS")
-elseif (LINUX)
+elseif (UNIX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
 endif ()
 

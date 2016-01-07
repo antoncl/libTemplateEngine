@@ -1,5 +1,3 @@
-@mainpage libTemplateEngine documentation
-
 # Introduction {#introduction}
 libTemplateEngine is a simple unicode aware templating engine.
 
@@ -26,9 +24,9 @@ can be converted into:
 ~~~
 
 # Motivation {#motivation}
-I started writing C code back in the Kernigan and Richie days, I continued to write C and C++ code, although professionally more focus was given to C# with the advent of the .Net framework. Now, I find myself with a bit of extra spare time, and have decided to brush off my C++ skills.
+I started writing C code back in the Kernigan and Richie days. I continued to write C and C++ code, although professionally more focus was given to C# with the advent of the .Net framework. Now, I find myself with a bit of extra spare time, and have decided to brush off my C++ skills.
 
-In order to do that I decided on a small cross platform server project. One of the first orders was a cross platform capability of reporting performance counters. Remember Knuth's *premature optimization is the root of all evil*. Surprisingly I didn't find any readily available open source solutions, and decided to roll my own.
+In order to do that I decided on a small cross platform server project. One of the first tasks was cross platform capability of reporting performance counters. Remember Knuth's **premature optimization is the root of all evil**. Surprisingly I didn't find any readily available open source solutions, and decided to roll my own.
 
 That library uses a simple DSL (domain specific language) to hide away the platform specific code. It became obvious to me that a the code generation could be simplified tremendously by using a simple template engine.
 
@@ -64,6 +62,8 @@ All libraries - including libTemplateEngine - have no ownership of the output of
 
 # Concept {#concept}
 libTemplateEngine operates in a two step process.
+
+![Image depicting flow of data][ConceptSvg]
 
 @diafile ./concept.dia "" width=6cm
 
@@ -211,6 +211,8 @@ The task of managing the input is delegated to the [scanner][Scanner]. The purpo
 On windows libTemplateEngine has a small [utility][Converter] which can convert between UTF-8 and UTF-16. To the best of my knowledge that conversion utility is correct. Although the c++11 standard has methods for converting between UTF-32 and its smaller counterparts I have been unable to link that code under windows. There appears to be a bug reported to MS about this, and although it is more than six months old it hasn't been patched yet.
 
 Consequently the library has no means of converting between UTF-32 and UTF-16.
+
+[ConceptSvg]:https://rawgithub.com/potherca/StackOverflow/gh-pages/question.13808020.include-an-svg-hosted-on-github-in-markdown/controllers_brief.svg
 
 [AddStdString]: @ref template_engine::Dictionary::add(const template_engine::te_string, const std::string&)
 [Scanner]: @ref template_engine::Scanner

@@ -1,0 +1,29 @@
+#
+# build script for linux
+#
+if [ -d "build" ]; then
+	echo "Deleting old configuration"
+	rm -R build
+fi
+
+#
+# Build the debug version
+#
+mkdir build
+mkdir build/debug
+cd build/debug
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=../.. -G"Unix Makefiles" ../../src
+cd ../..
+cmake --build build/debug --config Debug
+cmake --build build/debug --target install
+
+#
+# Build the release version
+#
+mkdir build/release
+cd build/release
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../.. -G"Unix Makefiles" ../../src
+cd ../..
+cmake --build build/release --config Release
+cmake --build build/release --target install
+
