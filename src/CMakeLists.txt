@@ -1,16 +1,30 @@
 #
 # Project build
 #
-
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.2)
 
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
 
 project(TemplateEngine)
+include(CMakeDependentOption)
 
-option(USE_UNITTEST "Compile and run unit tests" OFF)
-option(BUILD_DOCUMENTATION "Generate documenation" OFF)
+set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME     ON)
+find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+if(Boost_FOUND)
+	option(USE_UNITTEST "Compile and run unit tests" ON)
+else()
+	option(USE_UNITTEST "Compile and run unit tests" OFF)
+endif(Boost_FOUND)
+
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+	option(BUILD_DOCUMENTATION "Generate documenation" ON)
+else()
+	option(BUILD_DOCUMENTATION "Generate documenation" OFF)
+endif(DOXYGEN_FOUND)
 
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(SEND_ERROR "In-source builds are not allowed.")
