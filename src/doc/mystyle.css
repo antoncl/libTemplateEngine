@@ -2,3 +2,11 @@
 {
    text-align: left;
 }
+
+/*
+img[src$=”concept.svg”] {
+	width: 600px;
+	height: 411px;
+	text-align: left;
+}
+*/

@@ -1,5 +1,7 @@
+[TOC]
+
 # Introduction {#introduction}
-libTemplateEngine is a simple unicode aware templating engine.
+libTemplateEngine is a simple unicode awawre templating engine.
 
 In the simplest form, the engine will use a dictionary to expand named values contained in a template. E.g.
 
@@ -39,7 +41,7 @@ I wanted a lightweight, simple, cross platform templating engine, with full unic
 
 Those requirements are quite fluffy, e.g. what does *lightweight* mean?
 
-For my purposes lightweight means, no external dependencies! I've had to compromise a bit on this goal. The unit tests depends on [boost](http://www.boost.org/ "link to the boost library homepage"), the build environment depends on [cmake](https://cmake.org/ "link to the cmake library") and this documentation depends on [doxygen](http://www.stack.nl/~dimitri/doxygen/ "link to the doxygen application"). The core library can be build without boost and doxygen.
+For my purposes lightweight means, no external dependencies! I've had to compromise a bit on this goal. The unit tests depends on [boost][Boost], the build environment depends on [cmake][CMake] and this documentation depends on [doxygen][doxygen]. The core library can be build without boost and doxygen.
 
 Another aspect of lightweight is that is builds as a static link library, a .a or .lib file, rather than a .so or .dll file. I doubt that this library will gain such popularity that the hazzles of yet another install time component is worth the effort.
 
@@ -48,7 +50,7 @@ Cross platform in this context means that it can be built and run under both mos
 Full unicode support means just that. The actual text being expanded by the engine should support all 17 planes, and the engine should correctly expand all unicode based templates regardless of the glyphs being displayed. If I want hieroglyphics or klingon text, I should be able to get that.
 
 # Licensing {#licensing}
-The code is available under the [GNU LGPL license](http://www.gnu.org/licenses/lgpl-3.0-standalone.html "link to license text"). Which basically means you are free to link to the binary code, but any changes to the code should be made publicly available. If you do modify the code, fix a bug or add an interesting feature I'd appreciate a pull request.
+The code is available under the [GNU LGPL license][GnuLgpl]. Which basically means you are free to link to the binary code, but any changes to the code should be made publicly available. If you do modify the code, fix a bug or add an interesting feature I'd appreciate a pull request.
 
 Licenses of dependencies
 
@@ -60,12 +62,52 @@ Doxygen     | GPL     | Optional
 
 All libraries - including libTemplateEngine - have no ownership of the output of the application. Who ever has the copyright of the input, also holds the copyright of the output.
 
+# Building {#building}
+If you're an old hand at this, you probably only need to know that libTemplateEngine uses cmake and that it doesn't accept in-source builds.
+
+The root CMakeLists.txt is located in the `src`folder.
+
+During configuration it will try to locate boost and doxygen. If it finds boost it will enable building of the unit test framework, if it finds doxygen it will enable building of the documentation.
+
+## Build script {#build-script}
+CMake is a great tool, but unless you perform an install, it leaves the build results in some - in my opinion - odd places. I doubt anyone would want to make a system wide install of libTemplateEngine, so I've created a small build script which performs the build and then installs things in a safe local location.
+
+`./lib`                 - will contain the static libraries (.a/.lib).
+
+`./libTemplateEngine`   - will contain the header files.
+
+`./bin`                 - will contain the unit test executable, if it was built.
+
+`./doc`                 - will contain the documentation, if it was built.
+
+I know `libTemplateEngine` is a little unconventional, but this way - with proper specification of include folders - it is possibly to write something like this in your code:
+
+~~~.cpp
+#include <libTemplateEngine/TemplateEngine.hpp> 
+~~~
+
+you have a namespace for your include files! This way it is easy to see which library provides the header file.
+
+### Windows {#windows}
+The easiest way will be to use the `msbuild.cmd`file. 
+
+1. Open a Visual Studio 2015 command line prompt
+2. CD to the root of libTemplateEngine
+3. Type `msbuild` and press enter.
+
+The default for the script is to build everything using `nmake`, if you'd prefer to use Visual Studio solutions and projects, type: `msbuild vs`. Once the build has completed the solution and project files can be found in the `build`directory.
+
+### Linux {#linux}
+The easiest way will be to use the `libuild`script. 
+
+1. Open a shell/terminal window
+2. CD to the root of libTemplateEngine
+3. Type `libuild` and press enter.
+
 # Concept {#concept}
 libTemplateEngine operates in a two step process.
 
-![Image depicting flow of data][ConceptSvg]
-
-@diafile ./concept.dia "" width=6cm
+@diafile concept.dia width=10cm
 
 1. Compile the input stream into a list of template elements
 2. Pull in a dictionary and render the compiled text.
@@ -75,6 +117,7 @@ Any text enclosed between **`{{`** and **`}}`**, *start-tag* and *end-tag* respe
 Most of the following will focus on processing instructions since there is very little processing involved in handling the plain text components. Any plain text is copied from the input to the output almost verbatim, except for escape sequences.
 
 This concept of tagging - of course - begs the question of escaping, or how to have strings like "{{" passed through to the output stream without any processing. libTemplateEngine handles this the usual way, via the backslash **'\'** character.
+
 
 Source| .. | Destination
 :----:|:--:|:----------:
@@ -86,22 +129,26 @@ Source| .. | Destination
 A stand alone backslash '\' or a backslash in any other combination will trigger an error during parsing.
 
 
-# Processing instructions {#processingInstruction}
+# Processing instructions {#processing-instructions}
 The format of a template, including instructions, can be seen in this syntax diagram:
 
-\image html template.svg "Copy anything which isn't an instruction to the output"
+@image html template.svg
+
+**Copy anything which isn't an instruction to the output**
 
 Only creativity sets a limit to what kinds of processing instructions could be implemented. libTemplateEngine only has three kinds of instructions (remember one of the goals was simplicity).
 
-\image html instruction.svg "Format of instructions"
+@image html instruction.svg
 
-The first is a simple dictionary lookup [expansion](#PI_Expansion).
+**Format of instructions**
 
-The second [repeats](#PI_Repeat) the embedded template a number of times.
+The first is a simple dictionary lookup [expansion](#expansion).
 
-The third is a [comment](#PI_Comment) which can be used to clarify the tempate instructions.
+The second [repeats](#repeat) the embedded template a number of times.
 
-## Expansion {#PI_Expansion}
+The third is a [comment](#comment) which can be used to clarify the tempate instructions.
+
+## Expansion {#expansion}
 **Syntax:**
 
 <b>{{</b>\<name\><b>}}</b>
@@ -116,7 +163,7 @@ An expansion simply performs a lookup in the context using the embedded name and
 
 If the name cannot be found an error is reported.
 
-## Repeat {#PI_Repeat}
+## Repeat {#repeat}
 **Syntax:**
 
 <b>{{\#repeat</b> \<label\><b>}}</b>\<template\><b>{{/repeat}}</b>
@@ -129,12 +176,12 @@ A repeat duplicates/copies the embedded template zero or more times, as determin
 
 A repeat instruction carries a label, assigned to it in the \<label\> part of the instruction. When the repeat is processed the context is queried for a value matching the label of the instruction. That value is expected to be a list of dictionaries, if not an error is reported.
 
-The details and intricacies of [dictionary lists](@ref template_engine::DictionaryList) and the context is documented [else where](#Context), but basic principle is that a dictionary entry may either be a simple text value or a list of dictionaries. 
+The details and intricacies of [dictionary lists][RefDictionaryList] and the context is documented [else where](#context), but basic principle is that a dictionary entry may either be a simple text value or a list of dictionaries. 
 
 
 The embedded template is copied once for each sub-dictionary in the dictionary list. If the dictionary list is empty, no copying is done.
 
-## Comment {#PI_Comment}
+## Comment {#comment}
 **Syntax:**
 
 <b>{{-</b>\<text\><b>}}</b>
@@ -146,8 +193,8 @@ Help document and clarify the template usage.
 **Method:**
 The text within the instruction is discarded.
 
-# Context and dictionaries {#Context}
-A [dictionary](@ref template_engine::Dictionary) is a data-structure which associates a given name with a given value.
+# Context and dictionaries {#context-and-dictionaries}
+A [dictionary][RefDictionary] is a data-structure which associates a given name with a given value.
 
 Name  | Value    
 :-----|:---------------
@@ -161,15 +208,15 @@ Name  | Value
 Name  | Rudolph Abel
 Block | <table><tr><td>Dict-1</td><td>Dict-2</td><td>...</td><td>Dict-n</td></tr></table>
 
-A [context](@ref template_engine::Context) can conceptually be thought of as a stack of dictionaries (Note! the stack is only implicitly expressed in the code). When the context is created it creates an internal dictionary containing some default values. The globally available values are defined [here](@ref template_engine::Context::Context).
+A [context][RefContext] can conceptually be thought of as a stack of dictionaries (Note! the stack is only implicitly expressed in the code). When the context is created it creates an internal dictionary containing some default values. The globally available values are defined [here][RefContextCTOR].
 
-Prior to calling [render](@ref template_engine::Template::render) on the template a dictionary should be attached to the context using the [setDictionary](@ref template_engine::Context::setDictionary) method.
+Prior to calling [render][RefTemplateRender] on the template a dictionary should be attached to the context using the [setDictionary][RefContextSetDictionary] method.
 
-When the rendering is started the context pushes first the it's global dictionary onto the stack, then by the dictionary supplied via [setDictionary](@ref template_engine::Context::setDictionary) is pushed onto the stack.
+When the rendering is started the context pushes first the it's global dictionary onto the stack, then by the dictionary supplied via [setDictionary][RefContextSetDictionary] is pushed onto the stack.
 
 Stack | Comment
 :-----|:-------------------------
-Main  |Assigned via [setDictionary](@ref template_engine::Context::setDictionary)
+Main  |Assigned via [setDictionary][RefContextSetDictionary]
 Global|System supplied values
 
 Dictionary lookup is performed by walking the stack from top to bottom. First the topmost dictionary is queried, if the entry isn't found in that dictionary, then the next dictionary on the stack is queried, until either the value is found or the stack has been exhausted.
@@ -187,32 +234,45 @@ Stack | Comment
 :-----|:-------------------------
 Dict-i|The i'th sub-dictionary of the list
 List  |The internal dictionary of the list
-Main  |Assigned via [setDictionary](@ref template_engine::Context::setDictionary)
+Main  |Assigned via [setDictionary][RefContextSetDictionary]
 Global|System supplied values
 
-# Error reporting {#error_reporting}
-All errors are reported by throwing an [exception](@ref template_engine::TemplateException). In order to keep things simple only one kind of exception is defined. The exception inherits from the STL exception, and the actual error message can be queried via `what()`.
+# Error reporting {#error-reporting}
+All errors are reported by throwing an [exception][RefTemplateException]. In order to keep things simple only one kind of exception is defined. The exception inherits from the STL exception, and the actual error message can be queried via `what()`.
 
 The reasoning behind using exceptions rather than returning booleans from various method calls is that - once the application has been debugged - errors should be a rare occurrence.
 
-# Unicode and character sets {#Unicode}
+# Unicode and character sets {#unicode-and-character-sets}
 As stated previously, unicode correctness is one of the design goals of this project. for this reason some deliberation has gone into the decision about the format of the internal string buffers.
 
 Internally libTemplateEngine uses UTF-16 strings and characters. This was choice was made in order to strike a balance between memory footprint and the risk of polluting the internal structures with non-unicode strings.
 
-Note! A dictionary has a method for [adding][AddStdString] a std::string to the dictionary. It is important that the string is guaranteed to contain a valid UTF-8 string, otherwise the dictionary will be polluted, and the resulting output may not be unicode correct.
+Note! A dictionary has a method for [adding][RefAddStdString] a std::string to the dictionary. It is important that the string is guaranteed to contain a valid UTF-8 string, otherwise the dictionary will be polluted, and the resulting output may not be unicode correct.
 
-# Scanner {#Scanner}
+# Scanner {#scanner}
 libTemplateEngine is doing the easy part, the real work in being unicode correct lies in the input and output mechanisms.
 
-The task of managing the input is delegated to the [scanner][Scanner]. The purpose of the scanner is to take the input template, and convert it to an UTF-16 stream of UTF-16 code units.
+The task of managing the input is delegated to the [scanner][RefScanner]. The purpose of the scanner is to take the input template, and convert it to an UTF-16 stream of UTF-16 code units.
 
-# UTF-8 and UTF-16 conversion {#char_conversion}
-On windows libTemplateEngine has a small [utility][Converter] which can convert between UTF-8 and UTF-16. To the best of my knowledge that conversion utility is correct. Although the c++11 standard has methods for converting between UTF-32 and its smaller counterparts I have been unable to link that code under windows. There appears to be a bug reported to MS about this, and although it is more than six months old it hasn't been patched yet.
+# UTF-8 and UTF-16 conversion {#utf-8-and-utf-16-conversion}
+On windows libTemplateEngine has a small [utility][RefConverter], called te_converter, which can convert between UTF-8 and UTF-16. To the best of my knowledge that conversion utility is correct. Although the c++11 standard has methods for converting between UTF-32 and its smaller counterparts I have been unable to link that code under windows. There appears to be a bug reported to MS about this, and although it is more than six months old it hasn't been patched yet. Consequently the library has no means of converting between UTF-32 and UTF-16.
 
-Consequently the library has no means of converting between UTF-32 and UTF-16.
+[ConceptSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/concept.svg
+[TemplateSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/template.svg
+[InstructionSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/instruction.svg
+[Boost]: http://www.boost.org/
+[CMake]: https://cmake.org/
+[doxygen]: http://www.stack.nl/~dimitri/doxygen/
+[GnuLgpl]: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
-[ConceptSvg]:https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/concept.svg
-[AddStdString]: @ref template_engine::Dictionary::add(const template_engine::te_string, const std::string&)
-[Scanner]: @ref template_engine::Scanner
-[Converter]: @ref template_engine::te_converter
+[RefDictionaryList]:@ref template_engine::DictionaryList
+[RefDictionary]:@ref template_engine::Dictionary
+[RefContext]:@ref template_engine::Context
+[RefContextCTOR]:@ref template_engine::Context::Context
+[RefTemplateRender]:@ref template_engine::Template::render
+[RefContextSetDictionary]:@ref template_engine::Context::setDictionary
+[RefTemplateException]:@ref template_engine::TemplateException
+[RefAddStdString]: @ref template_engine::Dictionary::add(const template_engine::te_string, const std::string&)
+[RefScanner]: @ref template_engine::Scanner
+[RefConverter]: @ref template_engine::te_converter
+

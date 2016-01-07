@@ -1,24 +1,34 @@
-- [Introduction](#)
-- [Motivation](#)
-- [Goals](#)
-- [Licensing](#)
-- [Concept](#)
-- [Processing instructions](#)
-	- [Expansion](#)
-	- [Repeat](#)
-	- [Comment](#)
-- [Context and dictionaries](#)
-- [Error reporting}](#)
-- [Unicode and character sets](#)
-- [Scanner](#)
-- [UTF-8 and UTF-16 conversion](#)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-# Introduction
-libTemplateEngine is a simple unicode aware templating engine.
+
+- [Introduction](#introduction)
+- [Motivation](#motivation)
+- [Goals](#goals)
+- [Licensing](#licensing)
+- [Building](#building)
+  - [Build script](#build-script)
+    - [Windows](#windows)
+    - [Linux](#linux)
+- [Concept](#concept)
+- [Processing instructions](#processing-instructions)
+  - [Expansion](#expansion)
+  - [Repeat](#repeat)
+  - [Comment](#comment)
+- [Context and dictionaries](#context-and-dictionaries)
+- [Error reporting](#error-reporting)
+- [Unicode and character sets](#unicode-and-character-sets)
+- [Scanner](#scanner)
+- [UTF-8 and UTF-16 conversion](#utf-8-and-utf-16-conversion)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# Introduction 
+libTemplateEngine is a simple unicode awawre templating engine.
 
 In the simplest form, the engine will use a dictionary to expand named values contained in a template. E.g.
 
-~~~.html
+```.html
 <form>
     {{FIRSTNAME}}:<br>
     <input type="text" name="firstname">
@@ -26,9 +36,9 @@ In the simplest form, the engine will use a dictionary to expand named values co
     {{LASTNAME}}:<br>
     <input type="text" name="lastname">
 </form>
-~~~
+```
 can be converted into:
-~~~.html
+```.html
 <form>
   First name:<br>
   <input type="text" name="firstname">
@@ -36,9 +46,9 @@ can be converted into:
   Last name:<br>
   <input type="text" name="lastname">
 </form> 
-~~~
+```
 
-# Motivation
+# Motivation 
 I started writing C code back in the Kernigan and Richie days. I continued to write C and C++ code, although professionally more focus was given to C# with the advent of the .Net framework. Now, I find myself with a bit of extra spare time, and have decided to brush off my C++ skills.
 
 In order to do that I decided on a small cross platform server project. One of the first tasks was cross platform capability of reporting performance counters. Remember Knuth's **premature optimization is the root of all evil**. Surprisingly I didn't find any readily available open source solutions, and decided to roll my own.
@@ -49,7 +59,7 @@ There are a lot of templating engines available. But none really matched my requ
 
 So, I decided to roll my own (is there a pattern here?). In retrospect it might have been quicker to go with a different code generation scheme, but as I started out say, I find myself with a bit of spare time on my hands.
 
-# Goals
+# Goals 
 I wanted a lightweight, simple, cross platform templating engine, with full unicode support.
 
 Those requirements are quite fluffy, e.g. what does *lightweight* mean?
@@ -62,7 +72,7 @@ Cross platform in this context means that it can be built and run under both mos
 
 Full unicode support means just that. The actual text being expanded by the engine should support all 17 planes, and the engine should correctly expand all unicode based templates regardless of the glyphs being displayed. If I want hieroglyphics or klingon text, I should be able to get that.
 
-# Licensing
+# Licensing 
 The code is available under the [GNU LGPL license][GnuLgpl]. Which basically means you are free to link to the binary code, but any changes to the code should be made publicly available. If you do modify the code, fix a bug or add an interesting feature I'd appreciate a pull request.
 
 Licenses of dependencies
@@ -75,14 +85,14 @@ Doxygen     | GPL     | Optional
 
 All libraries - including libTemplateEngine - have no ownership of the output of the application. Who ever has the copyright of the input, also holds the copyright of the output.
 
-# Building
+# Building 
 If you're an old hand at this, you probably only need to know that libTemplateEngine uses cmake and that it doesn't accept in-source builds.
 
 The root CMakeLists.txt is located in the `src`folder.
 
 During configuration it will try to locate boost and doxygen. If it finds boost it will enable building of the unit test framework, if it finds doxygen it will enable building of the documentation.
 
-## Build script
+## Build script 
 CMake is a great tool, but unless you perform an install, it leaves the build results in some - in my opinion - odd places. I doubt anyone would want to make a system wide install of libTemplateEngine, so I've created a small build script which performs the build and then installs things in a safe local location.
 
 `./lib`                 - will contain the static libraries (.a/.lib).
@@ -95,29 +105,29 @@ CMake is a great tool, but unless you perform an install, it leaves the build re
 
 I know `libTemplateEngine` is a little unconventional, but this way - with proper specification of include folders - it is possibly to write something like this in your code:
 
-~~~c++
+```.cpp
 #include <libTemplateEngine/TemplateEngine.hpp> 
-~~~
+```
 
 you have a namespace for your include files! This way it is easy to see which library provides the header file.
 
-### Windows
+### Windows 
 The easiest way will be to use the `msbuild.cmd`file. 
 
 1. Open a Visual Studio 2015 command line prompt
 2. CD to the root of libTemplateEngine
 3. Type `msbuild` and press enter.
 
-The default for the script is to build everything using `nmake`, if you'd prefer to use Visual Studio solutions and projects, type: `msbuild vs`. When the build has completed the solution and project files can be found in the `build`directory.
+The default for the script is to build everything using `nmake`, if you'd prefer to use Visual Studio solutions and projects, type: `msbuild vs`. Once the build has completed the solution and project files can be found in the `build`directory.
 
-### Linux
+### Linux 
 The easiest way will be to use the `libuild`script. 
 
 1. Open a shell/terminal window
 2. CD to the root of libTemplateEngine
 3. Type `libuild` and press enter.
 
-# Concept
+# Concept 
 libTemplateEngine operates in a two step process.
 
 ![Image depicting flow of data][ConceptSvg]
@@ -142,7 +152,7 @@ Source| .. | Destination
 A stand alone backslash '\' or a backslash in any other combination will trigger an error during parsing.
 
 
-# Processing instructions
+# Processing instructions 
 The format of a template, including instructions, can be seen in this syntax diagram:
 
 ![TemplateSvg]
@@ -155,13 +165,13 @@ Only creativity sets a limit to what kinds of processing instructions could be i
 
 **Format of instructions**
 
-The first is a simple dictionary lookup [expansion](#PI_Expansion).
+The first is a simple dictionary lookup [expansion](#expansion).
 
-The second [repeats](#PI_Repeat) the embedded template a number of times.
+The second [repeats](#repeat) the embedded template a number of times.
 
-The third is a [comment](#PI_Comment) which can be used to clarify the tempate instructions.
+The third is a [comment](#comment) which can be used to clarify the tempate instructions.
 
-## Expansion
+## Expansion 
 **Syntax:**
 
 <b>{{</b>\<name\><b>}}</b>
@@ -176,7 +186,7 @@ An expansion simply performs a lookup in the context using the embedded name and
 
 If the name cannot be found an error is reported.
 
-## Repeat
+## Repeat 
 **Syntax:**
 
 <b>{{\#repeat</b> \<label\><b>}}</b>\<template\><b>{{/repeat}}</b>
@@ -189,12 +199,12 @@ A repeat duplicates/copies the embedded template zero or more times, as determin
 
 A repeat instruction carries a label, assigned to it in the \<label\> part of the instruction. When the repeat is processed the context is queried for a value matching the label of the instruction. That value is expected to be a list of dictionaries, if not an error is reported.
 
-The details and intricacies of [dictionary lists][RefDictionaryList] and the context is documented [else where](#Context), but basic principle is that a dictionary entry may either be a simple text value or a list of dictionaries. 
+The details and intricacies of [dictionary lists][RefDictionaryList] and the context is documented [else where](#context), but basic principle is that a dictionary entry may either be a simple text value or a list of dictionaries. 
 
 
 The embedded template is copied once for each sub-dictionary in the dictionary list. If the dictionary list is empty, no copying is done.
 
-## Comment
+## Comment 
 **Syntax:**
 
 <b>{{-</b>\<text\><b>}}</b>
@@ -206,7 +216,7 @@ Help document and clarify the template usage.
 **Method:**
 The text within the instruction is discarded.
 
-# Context and dictionaries
+# Context and dictionaries 
 A [dictionary][RefDictionary] is a data-structure which associates a given name with a given value.
 
 Name  | Value    
@@ -250,24 +260,24 @@ List  |The internal dictionary of the list
 Main  |Assigned via [setDictionary][RefContextSetDictionary]
 Global|System supplied values
 
-# Error reporting
+# Error reporting 
 All errors are reported by throwing an [exception][RefTemplateException]. In order to keep things simple only one kind of exception is defined. The exception inherits from the STL exception, and the actual error message can be queried via `what()`.
 
 The reasoning behind using exceptions rather than returning booleans from various method calls is that - once the application has been debugged - errors should be a rare occurrence.
 
-# Unicode and character sets
+# Unicode and character sets 
 As stated previously, unicode correctness is one of the design goals of this project. for this reason some deliberation has gone into the decision about the format of the internal string buffers.
 
 Internally libTemplateEngine uses UTF-16 strings and characters. This was choice was made in order to strike a balance between memory footprint and the risk of polluting the internal structures with non-unicode strings.
 
 Note! A dictionary has a method for [adding][RefAddStdString] a std::string to the dictionary. It is important that the string is guaranteed to contain a valid UTF-8 string, otherwise the dictionary will be polluted, and the resulting output may not be unicode correct.
 
-# Scanner
+# Scanner 
 libTemplateEngine is doing the easy part, the real work in being unicode correct lies in the input and output mechanisms.
 
 The task of managing the input is delegated to the [scanner][RefScanner]. The purpose of the scanner is to take the input template, and convert it to an UTF-16 stream of UTF-16 code units.
 
-# UTF-8 and UTF-16 conversion
+# UTF-8 and UTF-16 conversion 
 On windows libTemplateEngine has a small [utility][RefConverter], called te_converter, which can convert between UTF-8 and UTF-16. To the best of my knowledge that conversion utility is correct. Although the c++11 standard has methods for converting between UTF-32 and its smaller counterparts I have been unable to link that code under windows. There appears to be a bug reported to MS about this, and although it is more than six months old it hasn't been patched yet. Consequently the library has no means of converting between UTF-32 and UTF-16.
 
 [ConceptSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/concept.svg
@@ -277,6 +287,7 @@ On windows libTemplateEngine has a small [utility][RefConverter], called te_conv
 [CMake]: https://cmake.org/
 [doxygen]: http://www.stack.nl/~dimitri/doxygen/
 [GnuLgpl]: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+
 [RefDictionaryList]:./src/TemplateEngine/include/DictionaryList.hpp
 [RefDictionary]: ./src/TemplateEngine/include/Dictionary.hpp
 [RefContext]:./src/TemplateEngine/include/Context.hpp
@@ -287,3 +298,4 @@ On windows libTemplateEngine has a small [utility][RefConverter], called te_conv
 [RefAddStdString]: ./src/TemplateEngine/include/Dictionary.hpp
 [RefScanner]: ./src/TemplateEngine/include/Scanner.hpp
 [RefConverter]: ./src/TemplateEngine/include/Types.hpp
+
