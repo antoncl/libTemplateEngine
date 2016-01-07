@@ -1,0 +1,11 @@
+[RefDictionaryList]:@ref template_engine::DictionaryList
+[RefDictionary]:@ref template_engine::Dictionary
+[RefContext]:@ref template_engine::Context
+[RefContextCTOR]:@ref template_engine::Context::Context
+[RefTemplateRender]:@ref template_engine::Template::render
+[RefContextSetDictionary]:@ref template_engine::Context::setDictionary
+[RefTemplateException]:@ref template_engine::TemplateException
+[RefAddStdString]: @ref template_engine::Dictionary::add(const template_engine::te_string, const std::string&)
+[RefScanner]: @ref template_engine::Scanner
+[RefConverter]: @ref template_engine::te_converter
+

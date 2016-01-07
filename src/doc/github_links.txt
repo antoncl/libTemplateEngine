@@ -1,0 +1,11 @@
+[RefDictionaryList]:./src/TemplateEngine/include/DictionaryList.hpp
+[RefDictionary]: ./src/TemplateEngine/include/Dictionary.hpp
+[RefContext]:./src/TemplateEngine/include/Context.hpp
+[RefContextCTOR]:./src/TemplateEngine/include/Context.hpp
+[RefTemplateRender]:./src/TemplateEngine/include/Template.hpp
+[RefContextSetDictionary]:./src/TemplateEngine/include/Context.hpp
+[RefTemplateException]:./src/TemplateEngine/include/TemplateException.hpp
+[RefAddStdString]: ./src/TemplateEngine/include/Dictionary.hpp
+[RefScanner]: ./src/TemplateEngine/include/Scanner.hpp
+[RefConverter]: ./src/TemplateEngine/include/Types.hpp
+
