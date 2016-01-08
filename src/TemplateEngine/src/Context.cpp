@@ -29,9 +29,12 @@ Context::Context() : _dictionary(nullptr)
 
 	std::time_t timeNow = std::time(nullptr);		// grab time
 	std::tm* tmNow = std::gmtime(&timeNow);			// convert to GMT (UTC)
-	timeNow = std::mktime(tmNow);					// flip back to time_t type (sigh!)
 
-	add(TE_TEXT("TIME"), std::ctime(&timeNow));
+	char mbstr[100];
+	if (std::strftime(mbstr, sizeof(mbstr), "%c", tmNow))
+	    add(TE_TEXT("TIME"), mbstr);
+	else
+	    add(TE_TEXT("TIME"), "");
 }
 
 }

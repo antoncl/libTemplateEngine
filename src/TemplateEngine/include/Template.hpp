@@ -77,9 +77,9 @@ public:
      * \return virtual te_string        String where values from the dictionaries have been expanded.
      * \throws TemplateException        All and all errors encountered, e.g. missing dictionary entries,
      */
-	virtual te_string render(const Context& context, TemplateFilter filter = nullptr) const
+	virtual te_string render(const ContextPtr context, TemplateFilter filter = nullptr) const
 	{
-		return render(context.getDictionary(), filter);
+		return render(context->getDictionary(), filter);
 	}
 
 protected:

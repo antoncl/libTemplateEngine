@@ -24,9 +24,9 @@ using namespace template_engine;
 BOOST_TEST_DONT_PRINT_LOG_VALUE(te_string);
 
 struct Fixture {
-	Fixture() : dict(std::make_shared<Dictionary>()), ctx()
+	Fixture() : dict(std::make_shared<Dictionary>()), ctx(Context::BuildContext())
 	{
-		ctx.setDictionary(dict);
+		ctx->setDictionary(dict);
 		dict->add(TE_TEXT("TEST"), TE_TEXT("<TEST>"));
 
 		DictionaryListPtr list = std::make_shared<DictionaryList>();
@@ -45,7 +45,7 @@ struct Fixture {
 	~Fixture() { BOOST_TEST_MESSAGE("teardown fixture"); }
 
 	DictionaryPtr dict;
-	Context ctx;
+	ContextPtr ctx;
 };
 
 

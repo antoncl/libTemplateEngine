@@ -24,38 +24,38 @@
 
 namespace template_engine {
 
+class Context;
+typedef std::shared_ptr<Context> ContextPtr;
+
   /**
    * @brief A context is conceptually at the root of the Dictionary hierarchy.
    *
    * The context manages all other subdictionaries used during the redering process.
    * a template tree may use several subdictionaries, but only one context.
    */
-  class Context : public Dictionary
+class Context : public Dictionary
 {
 public:
-  /**
-   * @brief Instantiate the context used for rendering a template.
-   *
-   * During construction the global dictionary will be populated with the following values:
-   * |Name   |  values
-   * |:------|:---------
-   * |APP    | The name of the application (libTemplateEngine)
-   * |VERSION| The version number of libTemplateEngine
-   * |TIME   | The date and time where the context was created/instantiated
-   */
-    Context();
+    Context(const Context&) = delete;
 
+    /** @copydoc Context() */
+    static ContextPtr BuildContext()
+    {
+	return std::shared_ptr<Context>(new Context());
+    }
+    
     /** \brief Set the root dictionary.
      * The root dictionary will always be a simple dictionary. If the first
      * expansion instruction encountered is a repeat instruction. The dictionary
      * must *at least* have a single entry for that repeat instruction.
      *
      * \param dictionary const DictionaryPtr Pointer to the root dictionary.
-     *
      */
     void setDictionary(const DictionaryPtr dictionary)
     {
         _dictionary = dictionary;
+	
+	_dictionary->setParent(shared_from_this());
     }
 
     /** \brief Get a pointer to the root dictionary.
@@ -69,7 +69,19 @@ public:
 	}
 
 private:
-	DictionaryPtr _dictionary;      //<!@internal The current root dictionary.
+  /**
+   * @brief Instantiate the context used for rendering a template.
+   *
+   * During construction the global dictionary will be populated with the following values:
+   * |Name   |  values
+   * |:------|:---------
+   * |APP    | The name of the application (libTemplateEngine)
+   * |VERSION| The version number of libTemplateEngine
+   * |TIME   | The date and time where the context was created/instantiated
+   */
+    Context();
+    
+    DictionaryPtr _dictionary;      //<!@internal The current root dictionary.
 };
 
 }

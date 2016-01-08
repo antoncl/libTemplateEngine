@@ -55,3 +55,7 @@ endif (BUILD_DOCUMENTATION)
 if (USE_UNITTEST)
   add_subdirectory(test)
 endif (USE_UNITTEST)
+
+#build the examples
+add_subdirectory(examples/Simple)
+add_subdirectory(examples/List)

@@ -39,7 +39,7 @@ te_string ExpansionTemplate::render(const DictionaryPtr& dictionary, TemplateFil
 
 	te_converter converter;
 
-	throw TemplateException("The name '" + converter.to_bytes(_name) + "'could not be found");
+	throw TemplateException("The name '" + converter.to_bytes(_name) + "' could not be found");
 }
 
 }

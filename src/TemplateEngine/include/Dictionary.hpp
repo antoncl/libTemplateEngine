@@ -27,6 +27,8 @@
 namespace template_engine {
 
 class DictionaryList;
+class Context;
+
 /** \brief Define a pointer to a DictionaryList */
 typedef std::shared_ptr<DictionaryList> DictionaryListPtr;
 
@@ -39,6 +41,7 @@ typedef std::shared_ptr<Dictionary> DictionaryPtr;
 class Dictionary : public std::enable_shared_from_this<Dictionary>
 {
 	friend DictionaryList;
+	friend Context;
 private:
 
     /** \brief The element to be stored in the Dictionary
@@ -203,13 +206,13 @@ private:
      */
 	const Element& find(const te_string& name) const;
 protected:
-	std::shared_ptr<Dictionary> _parent;    ///< Reference to the parent scope/dictionary (may be nullptr)
+	DictionaryPtr _parent;    ///< Reference to the parent scope/dictionary (may be nullptr)
 
     /** \brief Get a reference to the parent of this dictionary.
      *
      * \return A pointer to the parent, may be nullptr
      */
-	const std::shared_ptr<Dictionary> getParent()
+	const DictionaryPtr getParent()
 	{
 		return _parent;
 	}
@@ -218,9 +221,9 @@ protected:
      *
      * \param parent The parent scope/dictionary to assign.
      */
-	void setParent(const std::shared_ptr<Dictionary> parent)
+	void setParent(const DictionaryPtr parent)
 	{
-		_parent = parent;
+	    _parent = parent;
 	}
 };
 

@@ -155,5 +155,28 @@ BOOST_AUTO_TEST_CASE(Dictionary04)
 	BOOST_REQUIRE_THROW(list->getCurrent()->getValue(TE_TEXT("NAME")), TemplateException);
 }
 
+BOOST_AUTO_TEST_CASE(Dictionary05)
+{
+    // Template to compile
+    StringScanner reader(TE_TEXT("{{APP}} {{NAME}}"));
+    
+    // Build the dictionary
+    DictionaryPtr root = std::make_shared<Dictionary>();
+    root->add(TE_TEXT("NAME"), TE_TEXT("<NAME>"));
+    
+    // Setup the template context
+    ContextPtr context = Context::BuildContext();
+
+    // Add root dictionary to context
+    context->setDictionary(root);
+    
+    // compile the template
+    TemplatePtr compiledTemplate = Template::parse(reader);
+
+    // render the template
+    te_string result = compiledTemplate->render(context);
+
+    BOOST_CHECK(result == TE_TEXT("libTemplateEngine <NAME>"));
+}
 
 BOOST_AUTO_TEST_SUITE_END()

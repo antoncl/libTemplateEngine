@@ -36,7 +36,7 @@ te_string RepeatTemplate::render(const DictionaryPtr& dictionary, TemplateFilter
 	if (!(dictionary->exists(_name) && dictionary->isList(_name))) {
 		te_converter converter;
 
-		throw TemplateException("The list '" + converter.to_bytes(_name) + "'could not be found");
+		throw TemplateException("The list '" + converter.to_bytes(_name) + "' could not be found");
 	}
 
 	DictionaryListPtr list = dictionary->getList(_name);
