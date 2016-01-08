@@ -1,0 +1,28 @@
+/**
+@example Simple/main.cpp
+
+This sample replicates the scenario shown in the introduction. Although libTemplateEngine isn't designed to handle tranlation of html files, this example does that.
+
+Except for the <SPAN style="font-family: Courier New">\#include</SPAN>, the example is pretty straightforward.
+
+The include statement as shown is the path used when the build engine compiled the samples. With a setup where the compilers include path is set to the root of libTemplateEngine, e.g. <EM><SPAN style="font-family: Courier New">-I/path/from/root/to/parent/folder</SPAN></EM> then the rather ugly looking <SPAN style="font-family: Courier New">\#include</SPAN> can be replaced with: <SPAN style="font-family: Courier New">\#include <libTemplateEngine/TemplateEngine.hpp></SPAN>.
+
+The use of <B><SPAN style="font-family: Courier New">APP</SPAN></B>, <B><SPAN style="font-family: Courier New">VERSION</SPAN></B> and <B><SPAN style="font-family: Courier New">TIME</SPAN></B> demonstrate the context stack, and are taken from the gloal dictionary.
+
+@example List/main.cpp
+
+Please look at the Simple example, since many things are the same between the two examples, and the commonalities aren't explained here.
+
+This sample is slightly more complex than the "simple" example. It introduces a <B><KBD>{{\#REPEAT...</KBD></B> and the [DictionaryList](@ref template_engine::DictionaryList).
+
+The repeat block itself has a comment preceeding the repeat block.
+
+During expansion, libTemplateEngine expects to find a dictionary list with a name of &quot;<b>chocolates</b>&quot;, which is inserted with the statement.
+<code>
+chokolate->add(TE_TEXT("chokolates"), chokolates);
+</code>
+
+Note the bit of trickery with the dictionary scoping going on. The attribute name "COLOR" is defined on both the dictionary list and on one sub dictionary entry. The "3 Musketeers" entry will take its value from the dictionary list, while the "Bournville" entry will take its value directly from its own dictionary.
+
+
+*/

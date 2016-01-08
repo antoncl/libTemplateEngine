@@ -1,3 +1,4 @@
+@mainpage
 [TOC]
 
 # Introduction {#introduction}
@@ -257,6 +258,13 @@ The task of managing the input is delegated to the [scanner][RefScanner]. The pu
 # UTF-8 and UTF-16 conversion {#utf-8-and-utf-16-conversion}
 On windows libTemplateEngine has a small [utility][RefConverter], called te_converter, which can convert between UTF-8 and UTF-16. To the best of my knowledge that conversion utility is correct. Although the c++11 standard has methods for converting between UTF-32 and its smaller counterparts I have been unable to link that code under windows. There appears to be a bug reported to MS about this, and although it is more than six months old it hasn't been patched yet. Consequently the library has no means of converting between UTF-32 and UTF-16.
 
+# Examples {#examples}
+I have included two example applications, which might help provide some insights into how everything fits together
+
+The [first][RefExample1] is very simple and builds upon the example shown in the [introduction][Introduction].
+
+The [second][RefExample2] shows how to use the [repeat][Repeat] instruction and [dictionary lists][RefDictionaryList].
+
 [ConceptSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/concept.svg
 [TemplateSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/template.svg
 [InstructionSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/instruction.svg
@@ -264,6 +272,8 @@ On windows libTemplateEngine has a small [utility][RefConverter], called te_conv
 [CMake]: https://cmake.org/
 [doxygen]: http://www.stack.nl/~dimitri/doxygen/
 [GnuLgpl]: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+[Introduction]: #introduction
+[Repeat]: #repeat
 
 [RefDictionaryList]:@ref template_engine::DictionaryList
 [RefDictionary]:@ref template_engine::Dictionary
@@ -275,4 +285,6 @@ On windows libTemplateEngine has a small [utility][RefConverter], called te_conv
 [RefAddStdString]: @ref template_engine::Dictionary::add(const template_engine::te_string, const std::string&)
 [RefScanner]: @ref template_engine::Scanner
 [RefConverter]: @ref template_engine::te_converter
+[RefExample1]: @ref Simple/main.cpp
+[RefExample2]: @ref List/main.cpp
 

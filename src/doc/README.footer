@@ -8,4 +8,5 @@
 [RefAddStdString]: ./src/TemplateEngine/include/Dictionary.hpp
 [RefScanner]: ./src/TemplateEngine/include/Scanner.hpp
 [RefConverter]: ./src/TemplateEngine/include/Types.hpp
-
+[RefExample1]: ./src/examples/Simple/main.cpp
+[RefExample2]: ./src/examples/List/main.cpp
