@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(Dictionary02)
 	BOOST_CHECK(dict->exists(TE_TEXT("NAME")));
 	BOOST_CHECK(dict->isValue(TE_TEXT("NAME")));
 	BOOST_CHECK(!dict->isList(TE_TEXT("NAME")));
-	BOOST_CHECK(*dict->getValue(TE_TEXT("NAME")) == TE_TEXT("VALUE"));
+	BOOST_CHECK(dict->getValue(TE_TEXT("NAME")) == TE_TEXT("VALUE"));
 }
 
 BOOST_AUTO_TEST_CASE(Dictionary03)
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(Dictionary03)
 	BOOST_CHECK(dict->exists(TE_TEXT("NAME")));
 	BOOST_CHECK(dict->isValue(TE_TEXT("NAME")));
 	BOOST_CHECK(!dict->isList(TE_TEXT("NAME")));
-	BOOST_CHECK(*dict->getValue(TE_TEXT("NAME")) == TE_TEXT("VALUE"));
+	BOOST_CHECK(dict->getValue(TE_TEXT("NAME")) == TE_TEXT("VALUE"));
 
 	BOOST_CHECK(dict->exists(TE_TEXT("LIST")));
 	BOOST_CHECK(!dict->isValue(TE_TEXT("LIST")));
@@ -86,13 +86,13 @@ BOOST_AUTO_TEST_CASE(Dictionary03)
 	BOOST_CHECK(list->exists(TE_TEXT("NAME2")));
 	BOOST_CHECK(list->isValue(TE_TEXT("NAME2")));
 	BOOST_CHECK(!list->isList(TE_TEXT("NAME2")));
-	BOOST_CHECK(*list->getValue(TE_TEXT("NAME2")) == TE_TEXT("VALUE2"));
+	BOOST_CHECK(list->getValue(TE_TEXT("NAME2")) == TE_TEXT("VALUE2"));
 
 	// test the scoping rules work as expected
 	BOOST_CHECK(list->exists(TE_TEXT("NAME")));
 	BOOST_CHECK(list->isValue(TE_TEXT("NAME")));
 	BOOST_CHECK(!list->isList(TE_TEXT("NAME")));
-	BOOST_CHECK(*list->getValue(TE_TEXT("NAME")) == TE_TEXT("VALUE"));
+	BOOST_CHECK(list->getValue(TE_TEXT("NAME")) == TE_TEXT("VALUE"));
 }
 
 BOOST_AUTO_TEST_CASE(Dictionary04)
@@ -112,14 +112,14 @@ BOOST_AUTO_TEST_CASE(Dictionary04)
 	BOOST_CHECK(child->exists(TE_TEXT("NAME")));
 	BOOST_CHECK(child->isValue(TE_TEXT("NAME")));
 	BOOST_CHECK(!child->isList(TE_TEXT("NAME")));
-	BOOST_CHECK(*child->getValue(TE_TEXT("NAME")) == TE_TEXT("CHILD1"));
+	BOOST_CHECK(child->getValue(TE_TEXT("NAME")) == TE_TEXT("CHILD1"));
 	BOOST_REQUIRE_THROW(child->getList(TE_TEXT("NAME")), TemplateException);
 
 	// The child should have access to the list dictionary
 	BOOST_CHECK(list->exists(TE_TEXT("NAME2")));
 	BOOST_CHECK(list->isValue(TE_TEXT("NAME2")));
 	BOOST_CHECK(!list->isList(TE_TEXT("NAME2")));
-	BOOST_CHECK(*list->getValue(TE_TEXT("NAME2")) == TE_TEXT("LIST"));
+	BOOST_CHECK(list->getValue(TE_TEXT("NAME2")) == TE_TEXT("LIST"));
 	BOOST_REQUIRE_THROW(list->getList(TE_TEXT("NAME2")), TemplateException);
 
 	// The child should have access to the root dictionary
@@ -148,9 +148,9 @@ BOOST_AUTO_TEST_CASE(Dictionary04)
 
 	// iterating through the list and look up values;
 	list->resetCursor();
-	BOOST_CHECK(*list->getCurrent()->getValue(TE_TEXT("NAME")) == TE_TEXT("CHILD1"));
+	BOOST_CHECK(list->getCurrent()->getValue(TE_TEXT("NAME")) == TE_TEXT("CHILD1"));
 	list->advanceCursor();
-	BOOST_CHECK(*list->getCurrent()->getValue(TE_TEXT("NAME")) == TE_TEXT("CHILD2"));
+	BOOST_CHECK(list->getCurrent()->getValue(TE_TEXT("NAME")) == TE_TEXT("CHILD2"));
 	list->advanceCursor();
 	BOOST_REQUIRE_THROW(list->getCurrent()->getValue(TE_TEXT("NAME")), TemplateException);
 }

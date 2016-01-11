@@ -42,8 +42,15 @@ add_library(${PROJECT_NAME} STATIC src/Context.cpp
   include/Types.hpp
   include/Version.hpp
 )
-
-set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
+if(ARCH STREQUAL "i386")
+	set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "32d")
+	set_target_properties(${PROJECT_NAME} PROPERTIES RELEASE_POSTFIX "32")
+elseif(ARCH STREQUAL "x86_64")
+	set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "64d")
+	set_target_properties(${PROJECT_NAME} PROPERTIES RELEASE_POSTFIX "64")
+else()
+	MESSAGE(FATAL_ERROR "Unsupported architecture: ${ARCH}")
+endif()
 
 # Required on Unix OS family to be able to be linked into shared libraries.
 set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)  

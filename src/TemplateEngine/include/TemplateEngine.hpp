@@ -19,10 +19,19 @@
 
 /* MSVC  linker settings. */
 #if defined(_MSC_VER)
-#    ifdef _DEBUG
-#        pragma comment(lib, "TemplateEngined.lib")
-#    else
-#        pragma comment(lib, "TemplateEngine.lib")
+#    if defined(_M_X64)
+#        ifdef _DEBUG
+#            pragma comment(lib, "TemplateEngine64d.lib")
+#        else
+#            pragma comment(lib, "TemplateEngine64.lib")
+#        endif
+#    endif
+#    if defined(_M_IX86)
+#        ifdef _DEBUG
+#            pragma comment(lib, "TemplateEngine32d.lib")
+#        else
+#            pragma comment(lib, "TemplateEngine32.lib")
+#        endif
 #    endif
 #    pragma comment(lib, "Kernel32.lib")
 #endif

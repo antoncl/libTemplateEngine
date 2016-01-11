@@ -9,6 +9,11 @@ set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
 project(TemplateEngine)
 include(CMakeDependentOption)
 
+# Determine if this is a 32 bit build or a 64 bit build
+include(build_scripts/TargetArch.cmake)
+target_architecture(ARCH)
+MESSAGE( STATUS "ARCH: ${ARCH}")
+
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME     ON)

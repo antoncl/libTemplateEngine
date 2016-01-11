@@ -21,7 +21,7 @@
 
 #define MAJOR		0
 #define MINOR		9
-#define PATCH		1
+#define PATCH		2
 #define PRE_RELEASE	""
 #define BUILD		""
 

@@ -151,7 +151,7 @@ public:
      * \return The simple string value represented by the key.
      * \throw TemplateException if the name cannot be found or isn't a simple string value.
      */
-	virtual const std::shared_ptr<const te_string>&  getValue(const te_string& name) const;
+	virtual const te_string&  getValue(const te_string& name) const;
 
     /** \brief does the specified name represent a DictionaryList.
      *

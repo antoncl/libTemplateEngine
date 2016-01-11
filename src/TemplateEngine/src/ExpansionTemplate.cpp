@@ -32,9 +32,9 @@ te_string ExpansionTemplate::render(const DictionaryPtr& dictionary, TemplateFil
 {
 	if(dictionary->exists(_name) && dictionary->isValue(_name)) {
 		if(filter)
-			return filter(*dictionary->getValue(_name));
+			return filter(dictionary->getValue(_name));
 		else
-			return *dictionary->getValue(_name);
+			return dictionary->getValue(_name);
 	}
 
 	te_converter converter;

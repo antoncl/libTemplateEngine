@@ -63,12 +63,12 @@ bool Dictionary::isValue(const te_string& name) const
 	return Element::element_t::Value == e.type;
 }
 
-const std::shared_ptr<const te_string>& Dictionary::getValue(const te_string& name) const
+const te_string& Dictionary::getValue(const te_string& name) const
 {
 	if (isValue(name)) {
 		const Element& e = find(name);
 
-		return e.value;
+		return *e.value;
 	}
 
 	te_converter converter;
