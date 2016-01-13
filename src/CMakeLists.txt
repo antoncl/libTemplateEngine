@@ -16,7 +16,8 @@ MESSAGE( STATUS "ARCH: ${ARCH}")
 
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
-set(Boost_USE_STATIC_RUNTIME     ON)
+set(Boost_USE_STATIC_RUNTIME     OFF)
+
 find_package(Boost COMPONENTS unit_test_framework)
 if(Boost_FOUND)
 	option(USE_UNITTEST "Compile and run unit tests" ON)

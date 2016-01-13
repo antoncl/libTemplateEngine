@@ -1,4 +1,4 @@
-      <svg xmlns="http://www.w3.org/2000/svg" width="342" height="228">
+      <svg xmlns="http://www.w3.org/2000/svg" width="382" height="112">
          <defs>
             <style type="text/css">
                @namespace "http://www.w3.org/2000/svg";
@@ -30,31 +30,23 @@
          </defs>
          <polygon points="9 33 1 29 1 37"/>
          <polygon points="17 33 9 29 9 37"/>
-         <polygon points="71 35 78 19 134 19 141 35 134 51 78 51"/>
-         <polygon points="69 33 76 17 132 17 139 33 132 49 76 49" class="regexp"/>
-         <text class="regexp" x="84" y="37">[^\{}]</text>
-         <rect x="71" y="63" width="36" height="32" rx="10"/>
-         <rect x="69" y="61" width="36" height="32" class="terminal" rx="10"/>
-         <text class="terminal" x="79" y="81">\\</text>
-         <rect x="71" y="107" width="36" height="32" rx="10"/>
-         <rect x="69" y="105" width="36" height="32" class="terminal" rx="10"/>
-         <text class="terminal" x="79" y="125">\{</text>
-         <rect x="71" y="151" width="36" height="32" rx="10"/>
-         <rect x="69" y="149" width="36" height="32" class="terminal" rx="10"/>
-         <text class="terminal" x="79" y="169">\}</text>
-         <rect x="71" y="195" width="38" height="32" rx="10"/>
-         <rect x="69" y="193" width="38" height="32" class="terminal" rx="10"/>
-         <text class="terminal" x="79" y="213">{{</text>
-         <a xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#Instruction" xlink:title="Instruction">
-            <rect x="129" y="195" width="88" height="32"/>
-            <rect x="127" y="193" width="88" height="32" class="nonterminal"/>
-            <text class="nonterminal" x="137" y="213">Instruction</text>
+         <a xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#PlainText" xlink:title="PlainText">
+            <rect x="91" y="19" width="76" height="32"/>
+            <rect x="89" y="17" width="76" height="32" class="nonterminal"/>
+            <text class="nonterminal" x="99" y="37">PlainText</text>
          </a>
-         <rect x="237" y="195" width="38" height="32" rx="10"/>
-         <rect x="235" y="193" width="38" height="32" class="terminal" rx="10"/>
-         <text class="terminal" x="245" y="213">}}</text>
-         <svg:path xmlns:svg="http://www.w3.org/2000/svg" class="line" d="m17 33 h2 m40 0 h10 m70 0 h10 m0 0 h134 m-244 0 h20 m224 0 h20 m-264 0 q10 0 10 10 m244 0 q0 -10 10 -10 m-254 10 v24 m244 0 v-24 m-244 24 q0 10 10 10 m224 0 q10 0 10 -10 m-234 10 h10 m36 0 h10 m0 0 h168 m-234 -10 v20 m244 0 v-20 m-244 20 v24 m244 0 v-24 m-244 24 q0 10 10 10 m224 0 q10 0 10 -10 m-234 10 h10 m36 0 h10 m0 0 h168 m-234 -10 v20 m244 0 v-20 m-244 20 v24 m244 0 v-24 m-244 24 q0 10 10 10 m224 0 q10 0 10 -10 m-234 10 h10 m36 0 h10 m0 0 h168 m-234 -10 v20 m244 0 v-20 m-244 20 v24 m244 0 v-24 m-244 24 q0 10 10 10 m224 0 q10 0 10 -10 m-234 10 h10 m38 0 h10 m0 0 h10 m88 0 h10 m0 0 h10 m38 0 h10 m-264 -176 l20 0 m-1 0 q-9 0 -9 -10 l0 -12 q0 -10 10 -10 m264 32 l20 0 m-20 0 q10 0 10 -10 l0 -12 q0 -10 -10 -10 m-264 0 h10 m0 0 h254 m23 32 h-3"/>
-         <polygon points="333 33 341 29 341 37"/>
-         <polygon points="333 33 325 29 325 37"/>
+         <rect x="91" y="63" width="38" height="32" rx="10"/>
+         <rect x="89" y="61" width="38" height="32" class="terminal" rx="10"/>
+         <text class="terminal" x="99" y="81">{{</text>
+         <a xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#Instruction" xlink:title="Instruction">
+            <rect x="149" y="63" width="88" height="32"/>
+            <rect x="147" y="61" width="88" height="32" class="nonterminal"/>
+            <text class="nonterminal" x="157" y="81">Instruction</text>
+         </a>
+         <rect x="257" y="63" width="38" height="32" rx="10"/>
+         <rect x="255" y="61" width="38" height="32" class="terminal" rx="10"/>
+         <text class="terminal" x="265" y="81">}}</text>
+         <svg:path xmlns:svg="http://www.w3.org/2000/svg" class="line" d="m17 33 h2 m60 0 h10 m76 0 h10 m0 0 h128 m-244 0 h20 m224 0 h20 m-264 0 q10 0 10 10 m244 0 q0 -10 10 -10 m-254 10 v24 m244 0 v-24 m-244 24 q0 10 10 10 m224 0 q10 0 10 -10 m-234 10 h10 m38 0 h10 m0 0 h10 m88 0 h10 m0 0 h10 m38 0 h10 m-264 -44 l20 0 m-1 0 q-9 0 -9 -10 l0 -12 q0 -10 10 -10 m264 32 l20 0 m-20 0 q10 0 10 -10 l0 -12 q0 -10 -10 -10 m-264 0 h10 m0 0 h254 m-304 32 h20 m304 0 h20 m-344 0 q10 0 10 10 m324 0 q0 -10 10 -10 m-334 10 v58 m324 0 v-58 m-324 58 q0 10 10 10 m304 0 q10 0 10 -10 m-314 10 h10 m0 0 h294 m23 -78 h-3"/>
+         <polygon points="373 33 381 29 381 37"/>
+         <polygon points="373 33 365 29 365 37"/>
       </svg>
-

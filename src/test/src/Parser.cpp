@@ -15,10 +15,11 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with libTemplateEngine. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/test/unit_test.hpp>
-namespace utf = boost::unit_test;
+
 
 #include <TemplateEngine.hpp>
 using namespace template_engine;
+namespace utf = boost::unit_test;
 
 // Boost test doesn't know these types and cannot output their value
 BOOST_TEST_DONT_PRINT_LOG_VALUE(te_string);
@@ -121,20 +122,6 @@ BOOST_AUTO_TEST_CASE(comment_parser_01)
 	te_string result = t->render(ctx);
 
 	BOOST_CHECK_EQUAL(result, TE_TEXT(""));
-}
-
-BOOST_AUTO_TEST_CASE(comment_parser_02)
-{
-	StringScanner s(TE_TEXT("{{- this is a comment"));
-	BOOST_REQUIRE_THROW(Template::parse(s), TemplateException);
-}
-
-BOOST_AUTO_TEST_CASE(comment_parser_03)
-{
-	// strictly speaking this is a bug, but the effort required to
-	// correct this is too big.
-	StringScanner s(TE_TEXT("{{- comment \\ with an embedded single backslash}}"));
-	BOOST_REQUIRE_THROW(Template::parse(s), TemplateException);
 }
 
 BOOST_AUTO_TEST_CASE(comment_parser_04)

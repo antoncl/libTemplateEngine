@@ -103,8 +103,6 @@ TemplatePtr Template::parseInstructionTemplate(Lexer& lexer)
 				return parseStartRepeatTemplate(lexer);
 			case TE_TEXT('/'):
 				return parseEndRepeatTemplate(lexer);
-			case TE_TEXT('-'):
-				return parseCommentTemplate(lexer);
 			default:
 				break;		// fall through to the exception
 		}
@@ -123,22 +121,6 @@ TemplatePtr Template::parseExpansionTemplate(const te_string& name, Lexer& lexer
 		throw TemplateException("Missing end tag '}}' in name expansion");
 
 	return std::make_unique<ExpansionTemplate>(name);
-}
-
-TemplatePtr Template::parseCommentTemplate(Lexer& lexer)
-{
-	Lexer::Token t = lexer.getNextToken();
-	while (	Lexer::Token::token_t::EndTag != t.getType() &&
-			Lexer::Token::token_t::Eos != t.getType())
-	{
-		t = lexer.getNextToken();
-	}
-
-	// check that we don't have a run-away comment
-	if (Lexer::Token::token_t::EndTag != t.getType())
-		throw TemplateException("Missing end tag '}}' in comment");
-
-	return TemplatePtr(nullptr);
 }
 
 TemplatePtr Template::parseStartRepeatTemplate(Lexer& lexer)

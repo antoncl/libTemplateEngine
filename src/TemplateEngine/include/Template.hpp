@@ -99,7 +99,6 @@ private:
 	static TemplatePtr parseInstructionTemplate(Lexer& lexer);
 	static TemplatePtr parseStartRepeatTemplate(Lexer& lexer);
 	static TemplatePtr parseEndRepeatTemplate(Lexer& lexer);
-	static TemplatePtr parseCommentTemplate(Lexer& lexer);
 	static TemplatePtr parseExpansionTemplate(const te_string& name, Lexer& lexer);
 
 	static size_t _recursionLevel;  //<! @internal Keep track of nesting level of repeats.

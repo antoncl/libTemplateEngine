@@ -1,27 +1,4 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-
-- [Introduction](#introduction)
-- [Motivation](#motivation)
-- [Goals](#goals)
-- [Licensing](#licensing)
-- [Building](#building)
-  - [Build script](#build-script)
-    - [Windows](#windows)
-    - [Linux](#linux)
-- [Concept](#concept)
-- [Processing instructions](#processing-instructions)
-  - [Expansion](#expansion)
-  - [Repeat](#repeat)
-  - [Comment](#comment)
-- [Context and dictionaries](#context-and-dictionaries)
-- [Error reporting](#error-reporting)
-- [Unicode and character sets](#unicode-and-character-sets)
-- [Scanner](#scanner)
-- [UTF-8 and UTF-16 conversion](#utf-8-and-utf-16-conversion)
-- [Examples](#examples)
-
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Introduction 
@@ -113,13 +90,13 @@ I know `libTemplateEngine` is a little unconventional, but this way - with prope
 you have a namespace for your include files! This way it is easy to see which library provides the header file.
 
 ### Windows 
-The easiest way will be to use the `msbuild.cmd`file. 
+The easiest way will be to use the `wibuild.cmd`file. 
 
 1. Open a Visual Studio 2015 command line prompt
 2. CD to the root of libTemplateEngine
-3. Type `msbuild` and press enter.
+3. Type `wibuild` and press enter.
 
-The default for the script is to build everything using `nmake`, if you'd prefer to use Visual Studio solutions and projects, type: `msbuild vs`. Once the build has completed the solution and project files can be found in the `build`directory.
+The the script will use Visual Studio solutions and projects to build the binaries. The build will performed four times, once for: debug x86, release x86, debug x64 and finally release x64. When the build has completed the solution and project files can be found in the `build` directory.
 
 ### Linux 
 The easiest way will be to use the `libuild`script. 
@@ -140,17 +117,16 @@ Any text enclosed between **`{{`** and **`}}`**, *start-tag* and *end-tag* respe
 
 Most of the following will focus on processing instructions since there is very little processing involved in handling the plain text components. Any plain text is copied from the input to the output almost verbatim, except for escape sequences.
 
-This concept of tagging - of course - begs the question of escaping, or how to have strings like "{{" passed through to the output stream without any processing. libTemplateEngine handles this the usual way, via the backslash **'\'** character.
+# Escape sequences 
+This concept of tagging - of course - begs the question of escaping, or how to have strings like "{{" passed through to the output stream without any processing. libTemplateEngine handles this the usual way, via the backslash **'\'** character. Although maybe not quite so usual. 
 
 
 Source| .. | Destination
 :----:|:--:|:----------:
-\\{   | -> |{
-\\}   | -> |}
-\\\\  | -> |\\
+\\{{  | -> |{{
+\\}}  | -> |}}
 
-
-A stand alone backslash '\' or a backslash in any other combination will trigger an error during parsing.
+Anything else is ignored. `\\{a}` will be passed on as plain text `\\{a}` and no escaping is done, only the character sequences `\\{{`and `\\}}` are treated specially. 
 
 
 # Processing instructions 
@@ -158,13 +134,16 @@ The format of a template, including instructions, can be seen in this syntax dia
 
 ![TemplateSvg]
 
-**Copy anything which isn't an instruction to the output**
+Where **PlainText** is defined as:
+
+![PlainTextSvg]
+
+*Note!* I know that from a formalistic viewpoint the above diagram doesn't make sense. What I wanted to show was that any unicode character can be used as plain text, except two left braces in a row and two right braces in a row, and how to escape those. I couldn't find a simple way of showing this without breaking a few formalistic rules. If you have a better solution, I'd love to hear it.
 
 Only creativity sets a limit to what kinds of processing instructions could be implemented. libTemplateEngine only has three kinds of instructions (remember one of the goals was simplicity).
 
-![InstructionSvg]
-
 **Format of instructions**
+![InstructionSvg]
 
 The first is a simple dictionary lookup [expansion](#expansion).
 

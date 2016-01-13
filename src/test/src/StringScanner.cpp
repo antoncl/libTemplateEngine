@@ -19,8 +19,8 @@
 #include <iostream>
 #include <TemplateEngine.hpp>
 using namespace template_engine;
-
-BOOST_AUTO_TEST_SUITE(ScannerTest);
+namespace utf = boost::unit_test;
+BOOST_AUTO_TEST_SUITE(ScannerTest); // , *utf::disabled());
 
 BOOST_AUTO_TEST_CASE(empty_string)
 {

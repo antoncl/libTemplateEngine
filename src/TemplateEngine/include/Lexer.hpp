@@ -18,6 +18,7 @@
 #define __LEXER_HPP_
 
 #include <utility>
+#include <stack>
 #include "Scanner.hpp"
 #include "LookaheadScanner.hpp"
 
@@ -27,14 +28,49 @@ namespace template_engine
 /** \brief Manages lexical analysis of a template definition stream.
  *
  * Parsing a template definition is a weird process where some parts
- * of the stream (simple text) is LL(0) and other parts of the stream
- * is LL(1). In order to support situations where we go from at LL(1)
- * situation to a LL(0) situation, the lexer supports putting/pushing
- * a token back via the putTokenBack() method.
+ * of the stream (simple text) is LL(2) and the instruction parts of
+ * the stream is LL(1). In order to support situations where we go
+ * from a LL(2) situation to a LL(0) situation, the lexer supports
+ * putting/pushing a token back via the putTokenBack() method.
  *
- * The lexer operates in two different states. Processing and non-
- * processing. In the processing state it will work.
- *
+ * The lexer is implemented as a state machine, operating in one
+ * of four different states.
+ * 
+ * State      |Description
+ * :----------|:-----------
+ * Simple     | When processing ordinary plain text.
+ * Instruction| When processing a template instruction (Except comments).
+ * Comment    | When processing a comment template instruction.
+ * Escape     | When processing an escape character.
+ * \dot "Lexer states and transitions"
+  digraph finite_state_machine {
+ rankdir=LR;
+ size="6"
+
+ graph [smoothing=avg_dist];
+ node [fontsize=20];
+ edge [fontname=Courier, fontsize=24];
+ node [shape = doublecircle, label=<<B>S</B><BR/>Simple>] S;
+ node [shape = circle,       label=<<B>I</B><BR/>Instruction>] I;
+ node [shape = circle,       label=<<B>C</B><BR/>Comment>] C;
+
+ subgraph Escapes {
+	node [shape = circle,       label=<<B>E</B><BR/>Escape>] E1;
+	node [shape = circle,       label=<<B>E</B><BR/>Escape>] E2;
+		E1 -> E2
+ 	{ rank=same; E1, E2 }
+	}
+ 
+ node [shape = point];
+ start -> S;
+ S -> I   [ label = "{{"];
+ I -> S   [ label = "}}"];
+ S -> C   [ label = "{{-"];
+ C -> S   [ label = "}}"];
+ S -> E1   [ label = "\\{{"];
+ E2 -> S   ;
+ }
+* \enddot
  * A word of warning! Most lexers have a stream or vector of
  * tokens. In order to keep the memory footprint down this lexer
  * only has one, which gets re-used over and over again.
@@ -95,7 +131,8 @@ public:
 	Lexer(Scanner& scanner) :
 		_scanner(scanner),
 		_token(),
-		_inProcessingInstruction(false)
+		_inProcessingInstruction(false),
+		_currentState(states_t::Simple)
 	{};
 
 	/** \brief Advance the scanner to the next logical token, and return the token.
@@ -113,7 +150,8 @@ public:
 	void putTokenBack(const Token& token);
 
 protected:
-	/** \internal Advance the scanner to the next logical token, and return the token.
+	/** \internal  
+	*  \brief Advance the scanner to the next logical token, and return the token.
 	*
 	* The returned token is reused in successive calls, if a reference is held
 	* to the returned value, the values of that token may/will be changed.
@@ -124,15 +162,44 @@ protected:
 	*/
 	const Token& getNextSimpleToken();
 
-	/** @internal Process the more structured information between start and end tags
+	/** @internal  
+	 * \brief Process the more structured information between start and end tags.
+	 * 		  
 	 * Anything between start and end tags is considered to be some kind of
 	 * processing information and can be dealt with in a more structured manner;
 	*/
-	const Token& getNextProcessingToken(const Token& token);
+	const Token& getNextInstructionToken();
+
+	/**
+	 * \internal
+	 * \brief Scan through the comment section, ignoring everything until just past the ned.
+	 *
+	 * \return	The next non comment token.
+	 */
+	const Token& getNextCommentToken();
+
+	/**
+	 * \internal
+	 * \brief process the next two characters on the stream as simple chars.
+	 *
+	 * \return	The char as a char token
+	 */
+	const Token& getNextEscapeToken();
 
 	LookaheadScanner _scanner;      ///< the Scanner to read the input from.
 	Token	_token;                 ///< the highly reused token, being passed around.
-	bool _inProcessingInstruction;  ///<
+	bool _inProcessingInstruction;  ///< is the lexer in the process instruction state
+
+private:
+	/** Enumerate the possible states of the lexer. */
+	enum class states_t { 
+		Simple,			///< The lexer is processing plain text
+		Instruction,	///< The lexer is processing a template instruction
+		Comment,		///< The lexer is processing a comment
+		Escape			///< The lexer is processing an escape sequence
+	};
+
+	states_t _currentState;	///< what is the current state of the lexer
 };
 
 }

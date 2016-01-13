@@ -44,7 +44,7 @@ struct Config {
 
 BOOST_GLOBAL_FIXTURE(Config);
 
-BOOST_AUTO_TEST_SUITE(DictionaryTest);
+BOOST_AUTO_TEST_SUITE(DictionaryTest); // , *utf::disabled());
 
 BOOST_AUTO_TEST_CASE(Dictionary01)
 {

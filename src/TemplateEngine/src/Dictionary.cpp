@@ -24,7 +24,7 @@ namespace template_engine {
 
 Dictionary::Dictionary() :
 	_map(),
-	_parent(nullptr)
+	_parent()
 {
 }
 
@@ -37,8 +37,8 @@ const Dictionary::Element& Dictionary::find(const te_string& name) const
 	te_dict::const_iterator it = _map.find(name);
 	if (it != _map.end())
 		return it->second;
-	else if (_parent) {
-		return _parent->find(name);
+	else if (!_parent.expired()) {
+		return _parent.lock()->find(name);
 	}
 
 	te_converter converter;
@@ -50,8 +50,8 @@ bool Dictionary::exists(const te_string& name) const
 	te_dict::const_iterator it = _map.find(name);
 	if (it != _map.end())
 		return true;
-	else if (_parent)
-		return _parent->exists(name);
+	else if (!_parent.expired())
+		return _parent.lock()->exists(name);
 
 	return false;
 }

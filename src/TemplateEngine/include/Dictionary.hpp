@@ -206,7 +206,7 @@ private:
      */
 	const Element& find(const te_string& name) const;
 protected:
-	DictionaryPtr _parent;    ///< Reference to the parent scope/dictionary (may be nullptr)
+	std::weak_ptr<Dictionary> _parent;    ///< Reference to the parent scope/dictionary (may be nullptr)
 
     /** \brief Get a reference to the parent of this dictionary.
      *
@@ -214,14 +214,14 @@ protected:
      */
 	const DictionaryPtr getParent()
 	{
-		return _parent;
+		return _parent.lock();
 	}
 
     /** \brief Set the parent scope/dictionary of this dictionary.
      *
      * \param parent The parent scope/dictionary to assign.
      */
-	void setParent(const DictionaryPtr parent)
+	void setParent(const DictionaryPtr& parent)
 	{
 	    _parent = parent;
 	}

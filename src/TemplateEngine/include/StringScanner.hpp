@@ -29,14 +29,20 @@ class StringScanner :
 {
 public:
 	/** Initialize a string scanner with an constant string.
-		* @param t	string to be parsed, a null pointer will be converted to an empty string
-		*/
+	 * @param t	string to be parsed, a null pointer will be converted to an empty string
+	 */
 	StringScanner(const te_char_t* const t) :
 		_template(t ? te_string(t) : te_string(TE_TEXT(""))),
 		_templateIterator(_template.begin())
 	{};
 
-    /** \copydoc Scanner::moveNext() */
+	/** \copydoc StringScanner::StringScanner(const te_char_t* const) */
+	StringScanner(const te_string& t) :
+		_template(te_string(t)),
+		_templateIterator(_template.begin())
+	{};
+
+	/** \copydoc Scanner::moveNext() */
 	virtual bool moveNext();
 
     /** \copydoc Scanner::atEos() */

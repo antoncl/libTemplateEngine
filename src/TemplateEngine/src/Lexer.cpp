@@ -27,154 +27,187 @@ namespace template_engine
 
 const Lexer::Token& Lexer::getNextSimpleToken()
 {
-	if (_scanner.atEos()) {
-		_token._type = Token::token_t::Eos;
-		return _token;
-	}
-
 	// grab a character from the scanner
 	te_char_t ch = _scanner.getChar();
 
 	// is not a special character
 	if( !(TE_TEXT('{') == ch || TE_TEXT('}') == ch || TE_TEXT('\\') == ch) )
 	{
-		_scanner.moveNext();			// eat the char;
+		_scanner.moveNext();				// eat ch;
 		_token._char = ch;
 		_token._type = Token::token_t::Char;
 		return _token;
 	}
 
-
+	// not a simple char copy, so peek at the next chars
 	te_char_t ch2 = _scanner.peek(1);
+	te_char_t ch3 = _scanner.peek(2);
+
+	// Comment tag? '{{-'
+	if ((TE_TEXT('{') == ch && TE_TEXT('{') == ch2 && TE_TEXT('-') == ch3)) {
+		_scanner.moveNext();				// eat ch
+		_scanner.moveNext();				// eat ch2
+		_scanner.moveNext();				// eat ch3
+
+		_currentState = states_t::Comment;
+		return getNextToken();
+	}
+
+	// Escape tag? '\{{' or '\}}'
+	if ( (TE_TEXT('\\') == ch && TE_TEXT('{') == ch2 && TE_TEXT('{') == ch3) ||
+		 (TE_TEXT('\\') == ch && TE_TEXT('}') == ch2 && TE_TEXT('}') == ch3)
+	   ) {
+		_scanner.moveNext();				// eat the backslash
+
+		_currentState = states_t::Escape;
+		return getNextEscapeToken();
+	}
 
 	// two '{{' in a row
 	if ((TE_TEXT('{') == ch && TE_TEXT('{') == ch2)) {
+		_currentState = states_t::Instruction;
+
 		_scanner.moveNext();				// eat ch
 		_scanner.moveNext();				// eat ch2
 		_token._type = Token::token_t::StartTag;
+
 		return _token;
 	}
 
 	// two '}}' in a row
+	// If the template is syntactically correct this cannot happen
+	// We check, in order to provide better errror reporting
 	if ((TE_TEXT('}') == ch && TE_TEXT('}') == ch2)) {
 		_scanner.moveNext();				// eat ch
 		_scanner.moveNext();				// eat ch2
+
 		_token._type = Token::token_t::EndTag;
 		return _token;
 	}
 
-	// two '\\' in a row
-	if ((TE_TEXT('\\') == ch && TE_TEXT('\\') == ch2)) {
-		_scanner.moveNext();				// eat ch
-		_scanner.moveNext();				// eat ch2
-		_token._type = Token::token_t::Char;
-		_token._char = TE_TEXT('\\');
-		return _token;
-	}
-
-	// an escaped start tag '\{'
-	if ((TE_TEXT('\\') == ch && TE_TEXT('{') == ch2)) {
-		_scanner.moveNext();				// eat ch
-		_scanner.moveNext();				// eat ch2
-		_token._type = Token::token_t::Char;
-		_token._char = TE_TEXT('{');
-		return _token;
-	}
-
-	// an escaped end tag '\}'
-	if ((TE_TEXT('\\') == ch && TE_TEXT('}') == ch2)) {
-		_scanner.moveNext();				// eat ch
-		_scanner.moveNext();				// eat ch2
-		_token._type = Token::token_t::Char;
-		_token._char = TE_TEXT('}');
-		return _token;
-	}
-
-	_scanner.moveNext();				// eat ch
-	throw TemplateException("Unmatched escape '\\' character");
+	// despite appearances ch is really just a simple char, i.e. a single backslash
+	// or curly parenthesis
+	_scanner.moveNext();				// eat ch;
+	_token._char = ch;
+	_token._type = Token::token_t::Char;
+	return _token;
 }
 
 const Lexer::Token& Lexer::getNextToken()
 {
-	const Token& tok = getNextSimpleToken();
+	if (_scanner.atEos()) {
+		_token._type = Token::token_t::Eos;
+		return _token;
+	}
 
-	if (Token::token_t::EndTag == tok.getType())
-		_inProcessingInstruction = false;
+	switch (_currentState)
+	{
+		case states_t::Simple:
+			return getNextSimpleToken();
+		case states_t::Instruction:
+			return getNextInstructionToken();
+		case states_t::Comment:
+			return getNextCommentToken();
+		case states_t::Escape:
+			return getNextEscapeToken();
+		default:
+			break;
+	}
 
-	if (_inProcessingInstruction && Token::token_t::Eos != tok.getType())
-		return getNextProcessingToken(tok);
-
-
-	if (Token::token_t::StartTag == tok.getType())
-		_inProcessingInstruction = true;
-
-	return tok;
+	throw TemplateException("Unknown internal lexer state");
 }
 
-const Lexer::Token& Lexer::getNextProcessingToken(const Token& token)
+const Lexer::Token& Lexer::getNextInstructionToken()
 {
-	static Token compoundToken;
-	compoundToken._type = token.getType();
-	compoundToken._char = token.getChar();
-	compoundToken._name.clear();
-
-	// processing instructions can either be:
-	// {{ <name> }}
-	// or
-	// {{ # repeat <name>}}
-	// or
-	// {{ / repeat }}
-	// or
-	// {{ - <comment> }}
-
-	Token t = token;
-
-	if(Token::token_t::StartTag == t.getType())
-		throw TemplateException("Start tag '{{' encountered within processing instruction");
-
 	// eat any whitespace
-	while (Token::token_t::Char == t.getType() && std::isspace(t.getChar()))
-		t = getNextSimpleToken();
+	te_char_t ch = _scanner.getChar();
+	while (std::isspace(ch)) {
+		_scanner.moveNext();
+		if (_scanner.atEos())
+			throw new TemplateException("Unexpected end of stream while parsing an instruction");
+
+		ch = _scanner.getChar();
+	}
 
 	// is the current token a charcter and one of the special processing characters?
-	if (Token::token_t::Char == t.getType() && (TE_TEXT('#') == t.getChar() || TE_TEXT('/') == t.getChar() || TE_TEXT('-') == t.getChar())) {
-		compoundToken._type = Token::token_t::Char;
-		compoundToken._char = t.getChar();
-		return compoundToken;
+	if (TE_TEXT('#') == ch || TE_TEXT('/') == ch || TE_TEXT('-') == ch) {
+		_token._type = Token::token_t::Char;
+		_token._char = ch;
+
+		_scanner.moveNext();	// eat ch
+		return _token;
 	}
 
-	// we'll - hopefully - break out of the loop before the end of stream
-	// when breaking out, care must be taken to restore the input stream
-	// to a sane state.
-	//
-	// This method looks one token ahead into the stream
-	// when we finish lexing processing instruction
-	// we need to put the scanned token back into the
-	// input stream
-	while (Token::token_t::Eos != t.getType()) {
-		if (Token::token_t::Char == t.getType()) {
-			if (std::isalnum(t.getChar()) || TE_TEXT('_') == t.getChar()) {
-				compoundToken._type = Token::token_t::Name;
-				compoundToken._name += t.getChar();
-			}
-			else {
-				putTokenBack(t);
-				return compoundToken;
-			}
-		} else if (Token::token_t::EndTag == t.getType()) {
-			putTokenBack(t);
-			return compoundToken;
-		}
-		else if (Token::token_t::StartTag == t.getType()) {
-			putTokenBack(t);
-			return compoundToken;
-		}
+	// End of instruction tag? '}}'
+	te_char_t ch2 = _scanner.peek(1);
+	if (TE_TEXT('}') == ch && TE_TEXT('}') == ch2) {
+		_scanner.moveNext();				// eat ch
+		_scanner.moveNext();				// eat ch2
 
-		t = getNextSimpleToken();
+		_token._type = Token::token_t::EndTag;
+
+		_currentState = states_t::Simple;
+		return _token;
 	}
 
-	return compoundToken;
+	// we've eliminated everything but a name token,
+	// so this must be a name token.
+	_token._name.clear();
+	_token._type = Token::token_t::Name;
+	while (!_scanner.atEos()) {
+		if (std::isalnum(ch) || TE_TEXT('_') == ch) {
+			_token._name += ch;
+			_scanner.moveNext();
+
+			// we shouldn't be able to reach eos here, but it might happen
+			if (_scanner.atEos())
+				break;
+		}
+		else
+			break;
+		ch = _scanner.getChar();
+	}
+
+	return _token;
 }
+
+const Lexer::Token& Lexer::getNextCommentToken()
+{
+	while (!_scanner.atEos())
+	{
+		te_char_t ch = _scanner.getChar();
+		if (TE_TEXT('}') == ch) {
+			te_char_t ch2 = _scanner.peek(1);
+			if (TE_TEXT('}') == ch2) {
+				_scanner.moveNext();		// eat ch
+				_scanner.moveNext();		// eat ch2
+
+				_currentState = states_t::Simple;
+				return getNextToken();
+			}
+		}
+		_scanner.moveNext();
+	}
+	
+	throw TemplateException("Runaway comment detected");
+}
+
+const Lexer::Token& Lexer::getNextEscapeToken()
+{
+	static uint32_t count = 3;
+
+	if (--count) {
+		_token._char = _scanner.getChar();
+		_token._type = Token::token_t::Char;
+		_scanner.moveNext();
+		return _token;
+	}
+
+	_currentState = states_t::Simple;
+	count = 3;
+	return getNextToken();
+}
+
 
 void Lexer::putTokenBack(const Token& token)
 {
@@ -191,14 +224,20 @@ void Lexer::putTokenBack(const Token& token)
         case Token::token_t::EndTag:
             _scanner.pushFront(TE_TEXT('}'));
             _scanner.pushFront(TE_TEXT('}'));
-            break;
+			// if we scanned an end tag, we entered the simple state
+			// and need to return to the instruction state
+			_currentState = states_t::Instruction;
+			_inProcessingInstruction = false;
+			break;
         case Token::token_t::StartTag:
             _scanner.pushFront(TE_TEXT('{'));
             _scanner.pushFront(TE_TEXT('{'));
 
-            // if we scanned a start tag, we entered the instruction state
-            _inProcessingInstruction = false;
-            break;
+			// if we scanned a start tag, we entered the instruction state
+			// and need to leave that state
+			_inProcessingInstruction = false;
+			_currentState = states_t::Simple;
+			break;
         case Token::token_t::Name:
             for (te_char_t ch : reverse(token.getName()))
                 _scanner.pushFront(ch);
