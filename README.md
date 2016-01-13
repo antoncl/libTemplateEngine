@@ -269,6 +269,7 @@ The [second][RefExample2] shows how to use the [repeat][Repeat] instruction and 
 
 [ConceptSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/concept.svg
 [TemplateSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/template.svg
+[PlainTextSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/plaintext.svg
 [InstructionSvg]: https://rawgit.com/antoncl/libTemplateEngine/master/src/doc/instruction.svg
 [Boost]: http://www.boost.org/
 [CMake]: https://cmake.org/
