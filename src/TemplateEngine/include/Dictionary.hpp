@@ -129,7 +129,16 @@ public:
 	/** Release all consumed resources */
 	virtual ~Dictionary();
 
-    /** \brief Can the name be found in the Dictionary hierarchy.
+	/** \brief Get a reference to the parent of this dictionary.
+	*
+	* \return A pointer to the parent, may be nullptr
+	*/
+	const DictionaryPtr getParent()
+	{
+		return _parent.lock();
+	}
+	
+	/** \brief Can the name be found in the Dictionary hierarchy.
      *
      * \param name Element name to lookup in the Dictionary hierarchy.
      * \return true if the name exists, false otherwise.
@@ -207,15 +216,6 @@ private:
 	const Element& find(const te_string& name) const;
 protected:
 	std::weak_ptr<Dictionary> _parent;    ///< Reference to the parent scope/dictionary (may be nullptr)
-
-    /** \brief Get a reference to the parent of this dictionary.
-     *
-     * \return A pointer to the parent, may be nullptr
-     */
-	const DictionaryPtr getParent()
-	{
-		return _parent.lock();
-	}
 
     /** \brief Set the parent scope/dictionary of this dictionary.
      *

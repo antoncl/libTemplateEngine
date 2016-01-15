@@ -113,21 +113,16 @@ libTemplateEngine operates in a two step process.
 1. Compile the input stream into a list of template elements
 2. Pull in a dictionary and render the compiled text.
 
-Any text enclosed between **`{{`** and **`}}`**, *start-tag* and *end-tag* respectively, is considered to be a processing instruction. Any text found outside these tags is considered to be plain text, and is copied verbatim. Any text inside tags are parsed separately and is considered to be some kind of instruction.
+Any text enclosed between **`{{`** and **`}}`**, *start-tag* and *end-tag* respectively, is considered to be a processing instruction. Any text found outside these tags is considered to be plain text, and is copied verbatim to the output stream. Any text inside tags are parsed separately and is considered to be some kind of instruction.
 
-Most of the following will focus on processing instructions since there is very little processing involved in handling the plain text components. Any plain text is copied from the input to the output almost verbatim, except for escape sequences.
+Most of the following will focus on processing instructions since there is very little processing involved in handling the plain text components. Any plain text, except for escape sequences, is copied from the input to the output verbatim.
 
 # Escape sequences 
-This concept of tagging - of course - begs the question of escaping, or how to have strings like "{{" passed through to the output stream without any processing. libTemplateEngine handles this the usual way, via the backslash **'\'** character. Although maybe not quite so usual. 
+This concept of tagging - of course - begs the question of escaping, or how to have strings like "{{" passed through to the output stream without any processing. libTemplateEngine handles this in a slightly unusual way. As usual the backslash **'\'** character can be used to escape the **{{** character.
 
+The goal was to have the least possible impact on the source text which should be handled by libTemplateEngine. When libTemplateEngine encounters two left braces in a row (**{{**) it looks at the third character immediately following the two braces, if that third character isn't one of the start characters of an instruction the sequence will be passed unmmodified on to the output stream.
 
-Source| .. | Destination
-:----:|:--:|:----------:
-\\{{  | -> |{{
-\\}}  | -> |}}
-
-Anything else is ignored. `\\{a}` will be passed on as plain text `\\{a}` and no escaping is done, only the character sequences `\\{{`and `\\}}` are treated specially. 
-
+To be specific, only if the stream contains a string matching this regular expression will it need to be escaped: `{{[:_a-zA-Z0-9-]`. Piping the source file through this ugly looking sed command will add an escape marker to any location which needs to be escaped: `sed s/\({{[:_a-zA-Z0-9-]\)/\\\1/`
 
 # Processing instructions 
 The format of a template, including instructions, can be seen in this syntax diagram:
@@ -138,7 +133,7 @@ Where **PlainText** is defined as:
 
 ![PlainTextSvg]
 
-*Note!* I know that from a formalistic viewpoint the above diagram doesn't make sense. What I wanted to show was that any unicode character can be used as plain text, except two left braces in a row and two right braces in a row, and how to escape those. I couldn't find a simple way of showing this without breaking a few formalistic rules. If you have a better solution, I'd love to hear it.
+*Note!* I know that from a formalistic viewpoint the above diagram doesn't make sense. What I wanted to show was that any unicode character can be used as plain text, except two left braces in a row, and how to escape those. I couldn't find a simple way of showing this without breaking a few formalistic rules. If you have a better solution, I'd love to hear it.
 
 Only creativity sets a limit to what kinds of processing instructions could be implemented. libTemplateEngine only has three kinds of instructions (remember one of the goals was simplicity).
 
@@ -154,7 +149,7 @@ The third is a [comment](#comment) which can be used to clarify the tempate inst
 ## Expansion 
 **Syntax:**
 
-<b>{{</b>\<name\><b>}}</b>
+<b>{{</b>\ ':'* <name\><b>}}</b>
 
 **Purpose:**
 
@@ -162,9 +157,94 @@ Replace the given name with a value from the associated dictionary.
 
 **Method:**
 
-An expansion simply performs a lookup in the context using the embedded name and outputs the contents of the entry found.
+An expansion performs a lookup in the context using the embedded name and outputs the contents of the entry found.
 
-If the name cannot be found an error is reported.
+The dictionaries in the context stack are searched for a matching name, if the name cannot be found an error is reported.
+
+Scoping of the search can be controlled using prefixed colons (`:`). Sometimes the dictionaries will contain identical names, either on purpose or by accident, by default, the value will be taken from the nearest scope where the name can be found. If the name should be taken from some other scope, colons can be used.
+
+Let's look at an example, given the following dictionary layout.
+<table>
+	<tr><th>Root</th><th></tr></tr>
+	<tr><th>Name</th>	<th>Value</th></tr>
+	<tr><td>Label</td>	<td>Root</td></tr>
+	<tr><td>Type</td>	<td>Integer</td></tr>
+	<tr>
+		<td>Class</td>
+		<td>
+			<table>
+				<tr><th>List</th><th></tr></tr>
+				<tr><th>Name</th>		<th>Value</th></tr>
+				<tr><td>Label</td>		<td>MyObject</td></tr>
+				<tr><td>Language</td>	<td>English</td></tr>
+				<tr>
+					<td>
+						<table>
+							<tr>
+								<th>Sub-1</th><th><td></td>
+								<th>Sub-2</th><th><td></td>
+								<th>Sub-3</th><th>
+							</tr>
+							<tr>
+								<th>Name</th>		<th>Value</th><td></td>
+								<th>Name</th>		<th>Value</th><td></td>
+								<th>Name</th>		<th>Value</th>
+							</tr>
+							<tr>
+								<td>Label</td>		<td>MyObjectEn</td><td></td>
+								<td>Label</td>		<td>MyObjectGe</td><td></td>
+								<td>Label</td>		<td>MyObjectFr</td>
+							</tr>
+							<tr>
+								<td>Language</td>	<td>English</td><td></td>
+								<td>Language</td>	<td>German</td><td></td>
+								<td>Language</td>	<td>French</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+
+and the following template
+```
+class {{LABEL}
+{
+	{{#repeat Class}}
+		class {{Label}}
+		{
+			{{Type}} {{:Label}} = Lookup({{::Label}})
+		}
+	{{/repeat}
+}
+```
+
+the following text will be generated:
+```
+class Root
+{
+		class MyObjectEn
+		{
+			Integer MyObject = Lookup(Root)
+		}
+		class MyObjectGe
+		{
+			Integer MyObject = Lookup(Root)
+		}
+		class MyObjectFr
+		{
+			Integer MyObject = Lookup(Root)
+		}
+}
+```
+Name             | Explanation
+:----------------|:-----------
+`{{Type}}`       | The name only exists in the root dictinary, and the scoped search will find that entry.
+`class {{label}}`| The value is taken from the active sub-dictionary, while rendering the repeat block
+`{{:Label}}`     | The colon breaks out of the immediate scope, yielding the dictionary associated with the list.
+`{{::Label}}`	 | The search for a name begins two steps up in the context stack, yielding the root dictionary.
 
 ## Repeat 
 **Syntax:**
@@ -223,7 +303,6 @@ Main  |Assigned via [setDictionary][RefContextSetDictionary]
 Global|System supplied values
 
 Dictionary lookup is performed by walking the stack from top to bottom. First the topmost dictionary is queried, if the entry isn't found in that dictionary, then the next dictionary on the stack is queried, until either the value is found or the stack has been exhausted.
-
 
 In the simple case, a template without any repeats, this is all that needs to be done. 
 

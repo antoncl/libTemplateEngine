@@ -19,6 +19,8 @@
 
 #include <utility>
 #include <stack>
+#include <cctype>
+
 #include "Scanner.hpp"
 #include "LookaheadScanner.hpp"
 
@@ -119,6 +121,19 @@ public:
         /** \brief Only valid if getType() type is \link token_t::Name Name \endlink */
 		inline const te_string& getName() const { return _name; }
 
+		/** \brief non-unicode aware case insensitive compare */
+		inline bool isName(const te_string& label) const
+		{
+			size_t sz = label.size();
+			if (_name.size() != sz)
+				return false;
+			for (size_t i = 0; i < sz; ++i)
+				if (tolower(_name[i]) != tolower(label[i]))
+					return false;
+
+			return true;
+		}
+
 	private:
 		token_t _type;      ///< Current token type
 		te_char_t _char;    ///< May be garbage if _type != \link token_t::Char Char \endlink
@@ -131,7 +146,6 @@ public:
 	Lexer(Scanner& scanner) :
 		_scanner(scanner),
 		_token(),
-		_inProcessingInstruction(false),
 		_currentState(states_t::Simple)
 	{};
 
@@ -148,6 +162,11 @@ public:
      * \param token const Token& The token to push back
      */
 	void putTokenBack(const Token& token);
+
+	/** Skip past any white space.
+	* Should only be called while in the instruction state.
+	*/
+	void skipWhiteSpace();
 
 protected:
 	/** \internal  
@@ -186,9 +205,18 @@ protected:
 	 */
 	const Token& getNextEscapeToken();
 
-	LookaheadScanner _scanner;      ///< the Scanner to read the input from.
-	Token	_token;                 ///< the highly reused token, being passed around.
-	bool _inProcessingInstruction;  ///< is the lexer in the process instruction state
+	/**
+	 * \internal
+	 * \brief Query if 'ch' is a valid character in a name token.
+	 *
+	 * \param	ch	The char to examine.
+	 *
+	 * \return	true if valid name character, false if not.
+	 */
+	inline bool isValidNameChar(te_char_t ch) { return std::isalnum(ch) || ch == TE_TEXT('_') || ch == TE_TEXT('-'); }
+
+	LookaheadScanner _scanner;	///< the Scanner to read the input from.
+	Token			 _token;    ///< the highly reused token, continously being passed around.
 
 private:
 	/** Enumerate the possible states of the lexer. */

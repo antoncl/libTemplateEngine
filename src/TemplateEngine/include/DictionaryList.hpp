@@ -24,6 +24,8 @@
 
 namespace template_engine {
 
+class RepeatTemplate;
+
 class DictionaryList;
 typedef std::shared_ptr<DictionaryList> DictionaryListPtr;
 
@@ -33,6 +35,8 @@ typedef std::shared_ptr<DictionaryList> DictionaryListPtr;
 class DictionaryList : public Dictionary
 {
 	friend Dictionary;
+	friend RepeatTemplate;
+
 public:
     /** Construct an empty dictionary list. */
 	DictionaryList();

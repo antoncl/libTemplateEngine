@@ -41,6 +41,9 @@ te_string RepeatTemplate::render(const DictionaryPtr& dictionary, TemplateFilter
 
 	DictionaryListPtr list = dictionary->getList(_name);
 
+	// assign the current dictionary as the parent scope
+	list->setParent(dictionary);
+
 	list->resetCursor();
 
 	for (size_t i = 0; i < list->size(); i++) {

@@ -18,7 +18,7 @@ doctoc ../../README.md
 # build the mainpage.md file
 #
 cat mainpage.header > mainpage.md
-cat mainpage.template |sed "s/#concept#/@diafile concept.dia width=10cm/"\
+cat mainpage.template |sed "s/#concept#/@image html concept.svg width=8cm/"\
 		      |sed "s/#TemplateSyntax#/@image html template.svg/"\
               |sed "s/#PlainTextSyntax#/@image html plaintext.svg/"|\
 		      |sed "s/#InstructionSyntax#/@image html instruction.svg/"\

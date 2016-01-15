@@ -66,10 +66,6 @@ public:
      */
 	static TemplatePtr parse(Scanner& s);
 
-    /** \brief The parser is *not* re-entrant and must be reset between invocations.
-     */
-	static void resetParser();
-
     /** \brief Render the template, based on the specified dictionary/context.
      *
      * \param context const Context&    The context to use when expanding values.
@@ -94,14 +90,13 @@ protected:
 	virtual te_string render(const DictionaryPtr& dictionary, TemplateFilter filter) const = 0;
 
 private:
-	static TemplatePtr parse(Lexer& l);
-	static TemplatePtr parseSimpleTemplate(const Lexer::Token& token, Lexer& lexer);
-	static TemplatePtr parseInstructionTemplate(Lexer& lexer);
-	static TemplatePtr parseStartRepeatTemplate(Lexer& lexer);
-	static TemplatePtr parseEndRepeatTemplate(Lexer& lexer);
-	static TemplatePtr parseExpansionTemplate(const te_string& name, Lexer& lexer);
-
-	static size_t _recursionLevel;  //<! @internal Keep track of nesting level of repeats.
+	static TemplatePtr	parse(Lexer& l);
+	static TemplatePtr	parseSimpleTemplate(const Lexer::Token& token, Lexer& lexer);
+	static TemplatePtr	parseInstructionTemplate(Lexer& lexer);
+	static TemplatePtr	parseRepeatTemplate(Lexer& lexer);
+	static te_string	parseStartRepeatTemplate(Lexer& lexer);
+	static TemplatePtr	parseEndRepeatTemplate(Lexer& lexer);
+	static TemplatePtr	parseExpansionTemplate(const Lexer::Token& token, Lexer& lexer);
 };
 
 }

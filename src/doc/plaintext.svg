@@ -1,4 +1,4 @@
-      <svg xmlns="http://www.w3.org/2000/svg" width="198" height="124">
+      <svg xmlns="http://www.w3.org/2000/svg" width="198" height="80">
          <defs>
             <style type="text/css">
                @namespace "http://www.w3.org/2000/svg";
@@ -38,10 +38,7 @@
          <rect x="51" y="47" width="46" height="32" rx="10"/>
          <rect x="49" y="45" width="46" height="32" class="terminal" rx="10"/>
          <text class="terminal" x="59" y="65">\{{</text>
-         <rect x="51" y="91" width="46" height="32" rx="10"/>
-         <rect x="49" y="89" width="46" height="32" class="terminal" rx="10"/>
-         <text class="terminal" x="59" y="109">\}}</text>
-         <svg:path xmlns:svg="http://www.w3.org/2000/svg" class="line" d="m17 17 h2 m20 0 h10 m100 0 h10 m-140 0 h20 m120 0 h20 m-160 0 q10 0 10 10 m140 0 q0 -10 10 -10 m-150 10 v24 m140 0 v-24 m-140 24 q0 10 10 10 m120 0 q10 0 10 -10 m-130 10 h10 m46 0 h10 m0 0 h54 m-130 -10 v20 m140 0 v-20 m-140 20 v24 m140 0 v-24 m-140 24 q0 10 10 10 m120 0 q10 0 10 -10 m-130 10 h10 m46 0 h10 m0 0 h54 m23 -88 h-3"/>
+         <svg:path xmlns:svg="http://www.w3.org/2000/svg" class="line" d="m17 17 h2 m20 0 h10 m100 0 h10 m-140 0 h20 m120 0 h20 m-160 0 q10 0 10 10 m140 0 q0 -10 10 -10 m-150 10 v24 m140 0 v-24 m-140 24 q0 10 10 10 m120 0 q10 0 10 -10 m-130 10 h10 m46 0 h10 m0 0 h54 m23 -44 h-3"/>
          <polygon points="189 17 197 13 197 21"/>
          <polygon points="189 17 181 13 181 21"/>
       </svg>

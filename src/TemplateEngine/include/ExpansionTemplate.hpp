@@ -31,9 +31,9 @@ public:
     /** \brief Construct an expansion template instruction
      *
      * \param name te_string    The name to be expanded, enclosed in <code>{{</code> and <code>}}</code>
-     *
+     * \param scopeWalk uint8_t	The name refers to a dictionary this many steps away on the stack
      */
-	ExpansionTemplate(te_string name);
+	ExpansionTemplate(const te_string& name, uint8_t scopeWalk);
 
 protected:
 
@@ -48,6 +48,7 @@ protected:
 
 private:
 	te_string _name;        //<! Name of the expansion instruction.
+	uint8_t  _scopeWalk;	///< how far to break out of the current scope
 };
 
 }

@@ -18,7 +18,7 @@ rem
 rem build the mainpage.md file
 rem
 type mainpage.header > mainpage.md
-type mainpage.template |sed "s/#concept#/@diafile concept.dia width=10cm/"|^
+type mainpage.template |sed "s/#concept#/@image html concept.svg width=8cm/"|^
 sed "s/#TemplateSyntax#/@image html template.svg/"|^
 sed "s/#PlainTextSyntax#/@image html plaintext.svg/"|^
 sed "s/#InstructionSyntax#/@image html instruction.svg/" >> mainpage.md

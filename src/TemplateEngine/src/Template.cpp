@@ -16,6 +16,7 @@
 // License along with libTemplateEngine. If not, see <http://www.gnu.org/licenses/>.
 #include "stdafx.h"
 
+#include <cstring>
 #include <memory>
 #include <algorithm>
 
@@ -31,13 +32,6 @@
 namespace template_engine
 {
 
-size_t Template::_recursionLevel = 0;
-
-void Template::resetParser()
-{
-	_recursionLevel = 0;
-}
-
 TemplatePtr Template::parse(Scanner& scanner)
 {
 	LookaheadScanner lookahead(scanner);
@@ -50,26 +44,24 @@ TemplatePtr Template::parse(Lexer& lexer)
 {
 	std::shared_ptr<TemplateList> templ = std::make_shared<TemplateList>();
 
-	Lexer::Token tok = lexer.getNextToken();
-	while (tok.getType() != Lexer::Token::token_t::Eos) {
-		size_t startRecursionLevel = _recursionLevel;
+	bool streamIsOk = true;
+	while (streamIsOk) {
+		const Lexer::Token& tok = lexer.getNextToken();
+		if (Lexer::Token::token_t::Eos != tok.getType()) {
+			TemplatePtr subTemplate(nullptr);
 
-		TemplatePtr subTemplate(nullptr);
+			if (Lexer::Token::token_t::Char == tok.getType())
+				subTemplate = parseSimpleTemplate(tok, lexer);
+			else if (Lexer::Token::token_t::StartTag == tok.getType())
+				subTemplate = parseInstructionTemplate(lexer);
 
-		if (Lexer::Token::token_t::Char == tok.getType())
-			subTemplate = parseSimpleTemplate(tok, lexer);
-		else if (Lexer::Token::token_t::StartTag == tok.getType())
-			subTemplate = parseInstructionTemplate(lexer);
-
-		if (subTemplate)
-			templ->push_back(subTemplate);
-
-		// if the recursion level has dropped, i.e. we parsed an end repeat
-		// we exit and return what ever we've got
-		if (startRecursionLevel > _recursionLevel)
-			break;
-
-		tok = lexer.getNextToken();
+			if (subTemplate)
+				templ->push_back(subTemplate);
+			else
+				return templ;
+		}
+		else
+			streamIsOk = false;
 	}
 
 	return templ;
@@ -89,93 +81,142 @@ TemplatePtr Template::parseSimpleTemplate(const Lexer::Token& token, Lexer& lexe
 	// read beyond the end of that template.
 	lexer.putTokenBack(t);
 
-	return std::make_unique<SimpleTemplate>(value);
+	return std::make_shared<SimpleTemplate>(value);
 }
 
 TemplatePtr Template::parseInstructionTemplate(Lexer& lexer)
 {
-	Lexer::Token t = lexer.getNextToken();
+	// {{? <name> }}
+	//   ^
 
-	if (Lexer::Token::token_t::Char == t.getType()) {
-		switch (t.getChar())
+	const Lexer::Token& instructionMarker = lexer.getNextToken();
+
+	if (Lexer::Token::token_t::Char == instructionMarker.getType()) {
+		switch (instructionMarker.getChar())
 		{
 			case TE_TEXT('#'):
-				return parseStartRepeatTemplate(lexer);
+				{
+					lexer.skipWhiteSpace();
+					const Lexer::Token& instructionStart = lexer.getNextToken();
+					if (Lexer::Token::token_t::Name == instructionStart.getType())
+					{
+						if (instructionStart.isName(TE_TEXT("repeat")))
+							return parseRepeatTemplate(lexer);
+						else {
+							te_converter converter;
+							throw new TemplateException("Unknown processing instruction: '" +
+								converter.to_bytes(instructionStart.getName()) + "'");
+						}
+					}
+				}
+				break;
 			case TE_TEXT('/'):
-				return parseEndRepeatTemplate(lexer);
+				{
+					lexer.skipWhiteSpace();
+					const Lexer::Token& instructionEnd = lexer.getNextToken();
+					if (Lexer::Token::token_t::Name == instructionEnd.getType())
+					{
+						if (instructionEnd.isName(TE_TEXT("repeat"))) {
+							return parseEndRepeatTemplate(lexer);
+						}
+						else {
+							te_converter converter;
+							throw new TemplateException("Unknown processing instruction: '" +
+								converter.to_bytes(instructionEnd.getName()) + "'");
+						}
+					}
+				}
+				break;
 			default:
 				break;		// fall through to the exception
 		}
 	}
-	else if (Lexer::Token::token_t::Name == t.getType())
-		return parseExpansionTemplate(t.getName(), lexer);
 
-	throw TemplateException("Unknown processing instruction");
+	return parseExpansionTemplate(instructionMarker, lexer);
 }
 
-TemplatePtr Template::parseExpansionTemplate(const te_string& name, Lexer& lexer)
+TemplatePtr Template::parseExpansionTemplate(const Lexer::Token& token, Lexer& lexer)
 {
-	const Lexer::Token& t = lexer.getNextToken();
+	// {{ (:)*<name> }}
+	//     ^
 
-	if (Lexer::Token::token_t::EndTag != t.getType())
+	const Lexer::Token* t = &token;
+	uint8_t colonCount = 0;
+
+	while (Lexer::Token::token_t::Char == t->getType() && TE_TEXT(':') == t->getChar()) {
+		++colonCount;
+		t = &lexer.getNextToken();
+	}
+
+	// {{ (:)*<name> }}
+	//        ^
+	te_string name;
+	if (Lexer::Token::token_t::Name == t->getType())
+		name = t->getName();
+	else 
+		throw TemplateException("Malformed name expansion");
+
+	// {{ (:)*<name> }}
+	//              ^
+
+	lexer.skipWhiteSpace();
+	t = &lexer.getNextToken();
+
+	if (Lexer::Token::token_t::EndTag != t->getType())
 		throw TemplateException("Missing end tag '}}' in name expansion");
 
-	return std::make_unique<ExpansionTemplate>(name);
+	return std::make_shared<ExpansionTemplate>(name, colonCount);
 }
 
-TemplatePtr Template::parseStartRepeatTemplate(Lexer& lexer)
+TemplatePtr Template::parseRepeatTemplate(Lexer& lexer)
 {
-	// repeat <name> }}
-	Lexer::Token operationToken = lexer.getNextToken();
+	// repeat <name> }} <text> {{/repeat}}
+	te_string name = parseStartRepeatTemplate(lexer);
+	TemplatePtr nestedTemplate = parse(lexer);
 
-	if (Lexer::Token::token_t::Name != operationToken.getType())
-		throw TemplateException("Operation name expected");
+	TemplatePtr templ = std::make_shared<RepeatTemplate>(name, nestedTemplate);
 
-	// make sure the operation name is all in lower case
-	te_string localCopy = operationToken.getName();
-	std::transform(localCopy.begin(), localCopy.end(), localCopy.begin(), ::tolower);
+	return templ;
+}
 
-	if(localCopy != TE_TEXT("repeat"))
-		throw TemplateException("The only supported instruction is 'repeat'");
+te_string Template::parseStartRepeatTemplate(Lexer& lexer)
+{
+	//{{# repeat  <name> }}
+	//           ^
 
-	Lexer::Token nameToken = lexer.getNextToken();
+	// skip the repeat name
+	lexer.getNextToken();
+
+	// <name>
+	lexer.skipWhiteSpace();
+	const Lexer::Token& nameToken = lexer.getNextToken();
 	if (Lexer::Token::token_t::Name != nameToken.getType())
 		throw TemplateException("Malformed repeat instruction, a name was expected");
 
-	Lexer::Token endToken = lexer.getNextToken();
+	te_string name = nameToken.getName();
+
+	// }}
+	lexer.skipWhiteSpace();
+	const Lexer::Token& endToken = lexer.getNextToken();
 	if (Lexer::Token::token_t::EndTag != endToken.getType())
 		throw TemplateException("Malformed repeat instruction, an end tag was expected");
 
-	// we've now parsed a valid start repeat instruction
-	// recursively parse the template
-	++_recursionLevel;
-	TemplatePtr nestedTemplate = parse(lexer);
-
-	return std::make_unique<RepeatTemplate>(nameToken.getName(), std::move(nestedTemplate));
+	return name;
 }
 
 TemplatePtr Template::parseEndRepeatTemplate(Lexer& lexer)
 {
-	// repeat <name> }}
-	Lexer::Token operationToken = lexer.getNextToken();
+	// {{/ repeat }}
+	//           ^
 
-	if (Lexer::Token::token_t::Name != operationToken.getType())
-		throw TemplateException("Operation name expected");
-
-	// make sure the operation name is all in lower case
-	te_string localCopy = operationToken.getName();
-	std::transform(localCopy.begin(), localCopy.end(), localCopy.begin(), ::tolower);
-
-	if (localCopy != TE_TEXT("repeat"))
-		throw TemplateException("The only supported instruction is 'repeat'");
-
-	Lexer::Token endToken = lexer.getNextToken();
-	if (Lexer::Token::token_t::EndTag != endToken.getType())
+	// }}
+	lexer.skipWhiteSpace();
+	const Lexer::Token& endTag = lexer.getNextToken();
+	if (Lexer::Token::token_t::EndTag != endTag.getType())
 		throw TemplateException("Malformed end repeat instruction, an end tag was expected");
 
-	// the end tag has no implementation
-	--_recursionLevel;
-	return TemplatePtr(nullptr);
+	// signal end of recursion
+	return nullptr;
 }
 
 }

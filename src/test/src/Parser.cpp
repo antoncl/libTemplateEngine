@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(repeat_parser_01)
 	BOOST_CHECK_EQUAL(result, TE_TEXT("BB"));
 }
 
-BOOST_AUTO_TEST_CASE(repeat_parser_02) // , *utf::enabled())
+BOOST_AUTO_TEST_CASE(repeat_parser_02)
 {
 	StringScanner s(TE_TEXT("A{{#repeat section}}B{{/repeat}}C"));
 	std::shared_ptr<Template> t = Template::parse(s);
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(repeat_parser_02) // , *utf::enabled())
 	BOOST_CHECK_EQUAL(result, TE_TEXT("ABBC"));
 }
 
-BOOST_AUTO_TEST_CASE(repeat_parser_03) // , *utf::enabled())
+BOOST_AUTO_TEST_CASE(repeat_parser_03)
 {
 	StringScanner s(TE_TEXT("A{{#repeat section}}{{B}}{{/repeat}}C"));
 	std::shared_ptr<Template> t = Template::parse(s);
@@ -200,6 +200,53 @@ BOOST_AUTO_TEST_CASE(repeat_parser_03) // , *utf::enabled())
 	te_string result = t->render(ctx);
 
 	BOOST_CHECK_EQUAL(result, TE_TEXT("AbbC"));
+}
+
+BOOST_AUTO_TEST_CASE(repeat_parser_04) // , *utf::enabled())
+{
+	ContextPtr context = Context::BuildContext();
+	context->add(TE_TEXT("N"), TE_TEXT("C"));
+	context->add(TE_TEXT("A"), TE_TEXT("a"));
+
+	DictionaryPtr root = std::make_shared<Dictionary>();
+	root->add(TE_TEXT("N"), TE_TEXT("R"));
+	root->add(TE_TEXT("B"), TE_TEXT("b"));
+	context->setDictionary(root);
+
+	DictionaryListPtr list = std::make_shared<DictionaryList>();
+	list->add(TE_TEXT("N"), TE_TEXT("L"));
+	list->add(TE_TEXT("C"), TE_TEXT("c"));
+	root->add(TE_TEXT("L1"), list);
+	root->add(TE_TEXT("L2"), list);
+
+	DictionaryPtr child = std::make_shared<Dictionary>();
+	child->add(TE_TEXT("N"), TE_TEXT("C1"));
+	child->add(TE_TEXT("D"), TE_TEXT("d"));
+	list->add(child);
+
+	child = std::make_shared<Dictionary>();
+	child->add(TE_TEXT("N"), TE_TEXT("C2"));
+	child->add(TE_TEXT("E"), TE_TEXT("e"));
+	list->add(child);
+
+	StringScanner s1(TE_TEXT("{{#repeat L1}}{{N}}{{/repeat}}{{#repeat L2}}{{N}}{{/repeat}}"));
+	std::shared_ptr<Template> t1 = Template::parse(s1);
+	te_string result1 = t1->render(context);
+	BOOST_CHECK_EQUAL(result1, TE_TEXT("C1C2C1C2"));
+
+	StringScanner s2(TE_TEXT("{{#repeat L1}}{{:N}}{{/repeat}}{{#repeat L2}}{{::N}}{{/repeat}}"));
+	std::shared_ptr<Template> t2 = Template::parse(s2);
+	te_string result2 = t2->render(context);
+	BOOST_CHECK_EQUAL(result2, TE_TEXT("LLRR"));
+
+	StringScanner s3(TE_TEXT("{{#repeat L1}}{{::N}}{{/repeat}}{{#repeat L2}}{{:::N}}{{/repeat}}"));
+	std::shared_ptr<Template> t3 = Template::parse(s3);
+	te_string result3 = t3->render(context);
+	BOOST_CHECK_EQUAL(result3, TE_TEXT("RRCC"));
+
+	StringScanner s4(TE_TEXT("{{#repeat L1}}{{:::N}}{{/repeat}}{{#repeat L2}}{{::::N}}{{/repeat}}"));
+	std::shared_ptr<Template> t4 = Template::parse(s4);
+	BOOST_REQUIRE_THROW(t4->render(context), TemplateException);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

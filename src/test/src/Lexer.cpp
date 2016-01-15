@@ -51,7 +51,10 @@ BOOST_AUTO_TEST_CASE(lexer03)
 	StringScanner s(TE_TEXT("{{"));
 	Lexer lexer(s);
 
-	BOOST_CHECK(Lexer::Token::token_t::StartTag == lexer.getNextToken().getType());
+	Lexer::Token t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('{') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('{') == t.getChar());
 	BOOST_CHECK(Lexer::Token::token_t::Eos == lexer.getNextToken().getType());
 }
 
@@ -60,7 +63,10 @@ BOOST_AUTO_TEST_CASE(lexer04)
 	StringScanner s(TE_TEXT("}}"));
 	Lexer lexer(s);
 
-	BOOST_CHECK(Lexer::Token::token_t::EndTag == lexer.getNextToken().getType());
+	Lexer::Token t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('}') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('}') == t.getChar());
 	BOOST_CHECK(Lexer::Token::token_t::Eos == lexer.getNextToken().getType());
 }
 
@@ -122,10 +128,16 @@ BOOST_AUTO_TEST_CASE(lexer10)
 	StringScanner s(uR"(\}}ab)");
 	Lexer lexer(s);
 
-	BOOST_CHECK(TE_TEXT('}') == lexer.getNextToken().getChar());
-	BOOST_CHECK(TE_TEXT('}') == lexer.getNextToken().getChar());
-	BOOST_CHECK(TE_TEXT('a') == lexer.getNextToken().getChar());
-	BOOST_CHECK(TE_TEXT('b') == lexer.getNextToken().getChar());
+	Lexer::Token t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('\\') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('}') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('}') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('a') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('b') == t.getChar());
 	BOOST_CHECK(Lexer::Token::token_t::Eos == lexer.getNextToken().getType());
 }
 
@@ -134,9 +146,28 @@ BOOST_AUTO_TEST_CASE(lexer11)
 	StringScanner s(TE_TEXT("{{   TEST}}"));
 	Lexer lexer(s);
 
-	BOOST_CHECK(Lexer::Token::token_t::StartTag == lexer.getNextToken().getType());
-	BOOST_CHECK(Lexer::Token::token_t::Name == lexer.getNextToken().getType());
-	BOOST_CHECK(Lexer::Token::token_t::EndTag == lexer.getNextToken().getType());
+	Lexer::Token t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('{') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('{') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT(' ') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT(' ') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT(' ') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('T') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('E') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('S') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('T') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('}') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('}') == t.getChar());
 	BOOST_CHECK(Lexer::Token::token_t::Eos == lexer.getNextToken().getType());
 }
 
@@ -167,8 +198,14 @@ BOOST_AUTO_TEST_CASE(lexer14)
 	StringScanner s(TE_TEXT("{{}}"));
 	Lexer lexer(s);
 
-	BOOST_CHECK(Lexer::Token::token_t::StartTag == lexer.getNextToken().getType());
-	BOOST_CHECK(Lexer::Token::token_t::EndTag == lexer.getNextToken().getType());
+	Lexer::Token t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('{') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('{') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('}') == t.getChar());
+	t = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Char == t.getType() && TE_TEXT('}') == t.getChar());
 	BOOST_CHECK(Lexer::Token::token_t::Eos == lexer.getNextToken().getType());
 }
 
@@ -185,8 +222,11 @@ BOOST_AUTO_TEST_CASE(lexer15)
 	BOOST_CHECK(t1.getName() == TE_TEXT("repeat"));
 
 	const Lexer::Token& t2 = lexer.getNextToken();
-	BOOST_CHECK(Lexer::Token::token_t::Name == t2.getType());
-	BOOST_CHECK(t2.getName() == TE_TEXT("name"));
+	BOOST_CHECK(Lexer::Token::token_t::Char == t2.getType() && TE_TEXT(' ') == t2.getChar());
+
+	const Lexer::Token& t3 = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Name == t3.getType());
+	BOOST_CHECK(t3.getName() == TE_TEXT("name"));
 
 	BOOST_CHECK(Lexer::Token::token_t::EndTag == lexer.getNextToken().getType());
 	BOOST_CHECK(Lexer::Token::token_t::Eos == lexer.getNextToken().getType());
@@ -235,6 +275,7 @@ BOOST_AUTO_TEST_CASE(lexer20)
 	BOOST_CHECK(TE_TEXT('a') == lexer.getNextToken().getChar());
 	BOOST_CHECK(TE_TEXT('{') == lexer.getNextToken().getChar());
 	BOOST_CHECK(TE_TEXT('{') == lexer.getNextToken().getChar());
+	BOOST_CHECK(TE_TEXT('\\') == lexer.getNextToken().getChar());
 	BOOST_CHECK(TE_TEXT('}') == lexer.getNextToken().getChar());
 	BOOST_CHECK(TE_TEXT('}') == lexer.getNextToken().getChar());
 	BOOST_CHECK(TE_TEXT('\\') == lexer.getNextToken().getChar());
@@ -264,6 +305,48 @@ BOOST_AUTO_TEST_CASE(lexer21)
 	BOOST_CHECK(Lexer::Token::token_t::Eos == lexer.getNextToken().getType());
 }
 
+BOOST_AUTO_TEST_CASE(lexer22)
+{
+	StringScanner s(uR"({{{TEST}})");
+	Lexer lexer(s);
+
+	BOOST_CHECK(TE_TEXT('{') == lexer.getNextToken().getChar());
+	BOOST_CHECK(Lexer::Token::token_t::StartTag == lexer.getNextToken().getType());
+	const Lexer::Token& t2 = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Name == t2.getType());
+	BOOST_CHECK(t2.getName() == TE_TEXT("TEST"));
+	BOOST_CHECK(Lexer::Token::token_t::EndTag == lexer.getNextToken().getType());
+	BOOST_CHECK(Lexer::Token::token_t::Eos == lexer.getNextToken().getType());
+}
+
+BOOST_AUTO_TEST_CASE(lexer23)
+{
+	StringScanner s(uR"({{{{TEST}})");
+	Lexer lexer(s);
+
+	BOOST_CHECK(TE_TEXT('{') == lexer.getNextToken().getChar());
+	BOOST_CHECK(TE_TEXT('{') == lexer.getNextToken().getChar());
+	BOOST_CHECK(Lexer::Token::token_t::StartTag == lexer.getNextToken().getType());
+	const Lexer::Token& t2 = lexer.getNextToken();
+	BOOST_CHECK(Lexer::Token::token_t::Name == t2.getType());
+	BOOST_CHECK(t2.getName() == TE_TEXT("TEST"));
+	BOOST_CHECK(Lexer::Token::token_t::EndTag == lexer.getNextToken().getType());
+	BOOST_CHECK(Lexer::Token::token_t::Eos == lexer.getNextToken().getType());
+}
+
+BOOST_AUTO_TEST_CASE(lexer24)
+{
+	StringScanner s(uR"({{{}{}})");
+	Lexer lexer(s);
+	BOOST_CHECK(TE_TEXT('{') == lexer.getNextToken().getChar());
+	BOOST_CHECK(TE_TEXT('{') == lexer.getNextToken().getChar());
+	BOOST_CHECK(TE_TEXT('{') == lexer.getNextToken().getChar());
+	BOOST_CHECK(TE_TEXT('}') == lexer.getNextToken().getChar());
+	BOOST_CHECK(TE_TEXT('{') == lexer.getNextToken().getChar());
+	BOOST_CHECK(TE_TEXT('}') == lexer.getNextToken().getChar());
+	BOOST_CHECK(TE_TEXT('}') == lexer.getNextToken().getChar());
+	BOOST_CHECK(Lexer::Token::token_t::Eos == lexer.getNextToken().getType());
+}
 BOOST_AUTO_TEST_SUITE_END()
 
 

@@ -16,8 +16,6 @@
 // License along with libTemplateEngine. If not, see <http://www.gnu.org/licenses/>.
 #include "stdafx.h"
 
-#include <cctype>
-
 #include "Lexer.hpp"
 #include "Exception.hpp"
 #include "ReverseIterator.hpp"
@@ -30,8 +28,8 @@ const Lexer::Token& Lexer::getNextSimpleToken()
 	// grab a character from the scanner
 	te_char_t ch = _scanner.getChar();
 
-	// is not a special character
-	if( !(TE_TEXT('{') == ch || TE_TEXT('}') == ch || TE_TEXT('\\') == ch) )
+	// for a simple token only '{' and '\' are special
+	if( !(TE_TEXT('{') == ch || TE_TEXT('\\') == ch) )
 	{
 		_scanner.moveNext();				// eat ch;
 		_token._char = ch;
@@ -53,10 +51,8 @@ const Lexer::Token& Lexer::getNextSimpleToken()
 		return getNextToken();
 	}
 
-	// Escape tag? '\{{' or '\}}'
-	if ( (TE_TEXT('\\') == ch && TE_TEXT('{') == ch2 && TE_TEXT('{') == ch3) ||
-		 (TE_TEXT('\\') == ch && TE_TEXT('}') == ch2 && TE_TEXT('}') == ch3)
-	   ) {
+	// Escape tag? '\{{'
+	if ( (TE_TEXT('\\') == ch && TE_TEXT('{') == ch2 && TE_TEXT('{') == ch3) ) {
 		_scanner.moveNext();				// eat the backslash
 
 		_currentState = states_t::Escape;
@@ -65,23 +61,21 @@ const Lexer::Token& Lexer::getNextSimpleToken()
 
 	// two '{{' in a row
 	if ((TE_TEXT('{') == ch && TE_TEXT('{') == ch2)) {
-		_currentState = states_t::Instruction;
 
-		_scanner.moveNext();				// eat ch
-		_scanner.moveNext();				// eat ch2
-		_token._type = Token::token_t::StartTag;
+		// examine ch3, if it can be part of an instruction we report a start tag
+		// otherwise we "auto-escape" ch
+		if (TE_TEXT('#') == ch3 || TE_TEXT('/') == ch3 || TE_TEXT(':') == ch3 || isValidNameChar(ch3)) {
+			_currentState = states_t::Instruction;
 
-		return _token;
-	}
-
-	// two '}}' in a row
-	// If the template is syntactically correct this cannot happen
-	// We check, in order to provide better errror reporting
-	if ((TE_TEXT('}') == ch && TE_TEXT('}') == ch2)) {
-		_scanner.moveNext();				// eat ch
-		_scanner.moveNext();				// eat ch2
-
-		_token._type = Token::token_t::EndTag;
+			_scanner.moveNext();				// eat ch
+			_scanner.moveNext();				// eat ch2
+			_token._type = Token::token_t::StartTag;
+		}
+		else {
+			_scanner.moveNext();				// eat ch, but nothing more
+			_token._char = ch;
+			_token._type = Token::token_t::Char;
+		}
 		return _token;
 	}
 
@@ -119,18 +113,10 @@ const Lexer::Token& Lexer::getNextToken()
 
 const Lexer::Token& Lexer::getNextInstructionToken()
 {
-	// eat any whitespace
 	te_char_t ch = _scanner.getChar();
-	while (std::isspace(ch)) {
-		_scanner.moveNext();
-		if (_scanner.atEos())
-			throw new TemplateException("Unexpected end of stream while parsing an instruction");
-
-		ch = _scanner.getChar();
-	}
 
 	// is the current token a charcter and one of the special processing characters?
-	if (TE_TEXT('#') == ch || TE_TEXT('/') == ch || TE_TEXT('-') == ch) {
+	if (TE_TEXT('#') == ch || TE_TEXT('/') == ch || TE_TEXT(':') == ch || ::isspace(ch)) {
 		_token._type = Token::token_t::Char;
 		_token._char = ch;
 
@@ -155,7 +141,7 @@ const Lexer::Token& Lexer::getNextInstructionToken()
 	_token._name.clear();
 	_token._type = Token::token_t::Name;
 	while (!_scanner.atEos()) {
-		if (std::isalnum(ch) || TE_TEXT('_') == ch) {
+		if (isValidNameChar(ch)) {
 			_token._name += ch;
 			_scanner.moveNext();
 
@@ -208,6 +194,21 @@ const Lexer::Token& Lexer::getNextEscapeToken()
 	return getNextToken();
 }
 
+void Lexer::skipWhiteSpace()
+{
+	if (_scanner.atEos())
+		return;
+
+	te_char_t ch = _scanner.getChar();
+	while (std::isspace(ch)) {
+		_scanner.moveNext();
+		if (_scanner.atEos())
+			return;
+
+		ch = _scanner.getChar();
+	}
+}
+
 
 void Lexer::putTokenBack(const Token& token)
 {
@@ -227,7 +228,6 @@ void Lexer::putTokenBack(const Token& token)
 			// if we scanned an end tag, we entered the simple state
 			// and need to return to the instruction state
 			_currentState = states_t::Instruction;
-			_inProcessingInstruction = false;
 			break;
         case Token::token_t::StartTag:
             _scanner.pushFront(TE_TEXT('{'));
@@ -235,7 +235,6 @@ void Lexer::putTokenBack(const Token& token)
 
 			// if we scanned a start tag, we entered the instruction state
 			// and need to leave that state
-			_inProcessingInstruction = false;
 			_currentState = states_t::Simple;
 			break;
         case Token::token_t::Name:

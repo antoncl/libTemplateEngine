@@ -22,19 +22,29 @@
 namespace template_engine
 {
 
-ExpansionTemplate::ExpansionTemplate(te_string name) :
-	_name(name)
+ExpansionTemplate::ExpansionTemplate(const te_string& name, uint8_t scopeWalk) :
+	_name(name),
+	_scopeWalk(scopeWalk)
 {
 }
 
 
 te_string ExpansionTemplate::render(const DictionaryPtr& dictionary, TemplateFilter filter) const
 {
-	if(dictionary->exists(_name) && dictionary->isValue(_name)) {
+	DictionaryPtr currentDictionary = dictionary;
+	// handle scoping
+	for (uint8_t i = 0; i < _scopeWalk; i++) {
+		currentDictionary = currentDictionary->getParent();
+		if (nullptr == currentDictionary)
+			throw TemplateException("Access to non existing parent scope");
+	}
+	
+	// do the actual lookup
+	if(currentDictionary->exists(_name) && currentDictionary->isValue(_name)) {
 		if(filter)
-			return filter(dictionary->getValue(_name));
+			return filter(currentDictionary->getValue(_name));
 		else
-			return dictionary->getValue(_name);
+			return currentDictionary->getValue(_name);
 	}
 
 	te_converter converter;

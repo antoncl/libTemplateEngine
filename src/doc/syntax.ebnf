@@ -2,12 +2,12 @@
 
 Template  ::= ( PlainText | '{{' Instruction '}}' )*
 
-PlainText ::= (UnicodeChar | "\{{" | "\}}" )
+PlainText ::= (UnicodeChar | "\{{" )
 
 UnicodeChar ::= [#x000000-#x10FFFF]
 
-Instruction ::=  (DictionaryName|'#' 'REPEAT' DictionaryName '}}' Template* '{{' '/' 'REPEAT' |'-' Comment) 
+Instruction ::=  ( DictionaryName|'#' 'REPEAT' DictionaryName '}}' Template* '{{' '/' 'REPEAT' |'-' Comment) 
 
-DictionaryName ::= [A-Za-z0-9]+
+DictionaryName ::= ':'* ([A-Za-z0-9]|'-'|'_')+
 
-Comment ::= [^\{}]
+Comment ::= [^\}]
